@@ -20,6 +20,7 @@ struct s_vertex {
 typedef struct s_vertex t_vertex;
 
 struct s_object {
+    char        *mtllib;
     t_vertex    *vertices;
     size_t      nbVertices;
     GLuint      *squareIndices;

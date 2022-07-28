@@ -15,7 +15,8 @@ int getObjectData(t_object *object, char *fileName) {
     while (1) {
         ret = fscanf(file, "%s", buffer);
         if (ret == EOF) {
-          /*  for (int n = 0; n < object->nbVertices; n++)
+          /*  printf("mtllib = %s\n", object->mtllib);
+            for (int n = 0; n < object->nbVertices; n++)
                 printf("x = %f, y = %f, z = %f\n", object->vertices[n].x, object->vertices[n].y, object->vertices[n].z);
             for (int n = 0; n < object->nbTriangleIndices; n++)
                 printf("%d,  %d, %d\n", object->triangleIndices[n * 3], object->triangleIndices[n * 3 + 1], object->triangleIndices[n * 3 + 2]);
@@ -39,6 +40,12 @@ int getObjectData(t_object *object, char *fileName) {
                 memcpy(&object->squareIndices[object->nbSquareIndices++ * 4], indices, sizeof(GLuint) * 4);
             }
         }
+        else if (!strcmp(buffer, "mtllib")) {
+            if (fscanf(file, "%s \n", buffer))
+                object->mtllib = strdup(buffer);
+        }
+        else
+            fscanf(file, "\n");
     }
 
     return (1);
@@ -125,9 +132,9 @@ int initShaders(t_scop *scop) {
 
 void initVertex(t_scop *scop) {
     static const GLfloat g_vertex_buffer_data[] = {
-        -1.0f, -1.0f, 0.0f,
-        1.0f, -1.0f, 0.0f,
-        0.0f,  1.0f, 0.0f,
+        -0.2f, -0.2f, 0.0f,
+        0.2f, -0.2f, 0.0f,
+        0.0f,  0.2f, 0.0f,
         };
 
     glGenVertexArrays(1, &scop->VAO);
