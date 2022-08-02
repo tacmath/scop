@@ -1,5 +1,7 @@
 #include "scop.h" 
 
+GLfloat scopScaleValue = 1.0f;
+GLuint  scopScaleID;
 
 int getObjectData(t_object *object, char *fileName) {
     FILE *file;
@@ -15,14 +17,14 @@ int getObjectData(t_object *object, char *fileName) {
     while (1) {
         ret = fscanf(file, "%s", buffer);
         if (ret == EOF) {
-          /*  printf("mtllib = %s\n", object->mtllib);
+           /* printf("mtllib = %s\n", object->mtllib);
             for (int n = 0; n < object->nbVertices; n++)
                 printf("x = %f, y = %f, z = %f\n", object->vertices[n].x, object->vertices[n].y, object->vertices[n].z);
             for (int n = 0; n < object->nbTriangleIndices; n++)
                 printf("%d,  %d, %d\n", object->triangleIndices[n * 3], object->triangleIndices[n * 3 + 1], object->triangleIndices[n * 3 + 2]);
             for (int n = 0; n < object->nbSquareIndices; n++)
             printf("%d,  %d, %d, %d\n", object->squareIndices[n * 4], object->squareIndices[n * 4 + 1], object->squareIndices[n * 4 + 2], object->squareIndices[n * 4 + 3]);
-            */return (1);
+           */ return (1);
         }
         if (!strcmp(buffer, "v")) {
             object->vertices = realloc(object->vertices, sizeof(t_vertex) * (object->nbVertices + 1));
@@ -51,6 +53,16 @@ int getObjectData(t_object *object, char *fileName) {
     return (1);
 }
 
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+    if (yoffset > 0)
+        scopScaleValue += scopScaleValue / 10;
+    else if (yoffset < 0)
+        scopScaleValue -= scopScaleValue / 10;
+    if (yoffset)
+        glUniform1f(scopScaleID, scopScaleValue);
+}
+
 int initWindow(t_scop *scop) {
     if( !glfwInit() )
         return (0);
@@ -59,7 +71,7 @@ int initWindow(t_scop *scop) {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // Pour rendre MacOS heureux ; ne devrait pas être nécessaire
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // On ne veut pas l'ancien OpenGL
-    if(!(scop->window = glfwCreateWindow( 1960, 1080, "Scop", NULL, NULL))) {
+    if(!(scop->window = glfwCreateWindow( 400, 300, "Scop", NULL, NULL))) {
         glfwTerminate();
         return (0);
     }
@@ -68,11 +80,14 @@ int initWindow(t_scop *scop) {
         return (0);
 //    scop->monitor = glfwGetWindowMonitor(scop->window);	
     glfwSetInputMode(scop->window, GLFW_STICKY_KEYS, GL_TRUE);
+    glfwSetScrollCallback(scop->window, scroll_callback);
     return (1);
 }
 
 void mainLoop(t_scop *scop) {
     glBindVertexArray(scop->VAO);
+    glUseProgram(scop->programShader);
+    glUniform1f(scopScaleID, scopScaleValue);
 
     while ( glfwGetKey(scop->window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
             glfwWindowShouldClose(scop->window) == 0 ) {
@@ -80,9 +95,8 @@ void mainLoop(t_scop *scop) {
 
         glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-		
-        glUseProgram(scop->programShader);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		//glDrawElements(GL_TRIANGLES, scop->object.nbTriangleIndices * 3, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, 9, GL_UNSIGNED_INT, 0);
 		glfwSwapBuffers(scop->window);
     }
 }
@@ -104,8 +118,8 @@ char *getShaderSource(char *fileName) {
 }
 
 int initShaders(t_scop *scop) {
-    const char* vertexShaderSource = getShaderSource("/Users/mtaquet/projet/scop/shaders/vertexShader");
-    const char* fragmentShaderSource = getShaderSource("/Users/mtaquet/projet/scop/shaders/fragmentShader");
+    const char* vertexShaderSource = getShaderSource("shaders/vertexShader");
+    const char* fragmentShaderSource = getShaderSource("shaders/fragmentShader");
    // printf("\n %s \n%s\n",vertexShaderSource, fragmentShaderSource);
     if (!vertexShaderSource || !fragmentShaderSource)
         return (0);
@@ -131,22 +145,61 @@ int initShaders(t_scop *scop) {
 }
 
 void initVertex(t_scop *scop) {
-    static const GLfloat g_vertex_buffer_data[] = {
-        -0.2f, -0.2f, 0.0f,
-        0.2f, -0.2f, 0.0f,
-        0.0f,  0.2f, 0.0f,
-        };
+GLfloat vertices[] =
+{
+    -0.5f, -0.5f * sqrt(3) / 3, 0.0f, // Lower left corner
+    0.5f, -0.5f * sqrt(3) / 3, 0.0f, // Lower right corner
+    0.0f, 0.5f * sqrt(3) * 2 / 3, 0.0f, // Upper corner
+    -0.5f / 2, 0.5f * sqrt(3) / 6, 0.0f, // Inner left
+    0.5f / 2, 0.5f * sqrt(3) / 6, 0.0f, // Inner right
+    0.0f, -0.5f * sqrt(3) / 3, 0.0f // Inner down
+};
+
+// Indices for vertices order
+GLuint indices[] =
+{
+    0, 3, 5, // Lower left triangle
+    3, 2, 4, // Lower right triangle
+    5, 4, 1 // Upper triangle
+};
+
+GLfloat color[] =
+{ //               COORDINATES                  /     COLORS           //
+	0.8f, 0.3f,  0.02f, // Lower left corner
+	0.8f, 0.3f,  0.02f, // Lower right corner
+	1.0f, 0.6f,  0.32f, // Upper corner
+	0.9f, 0.45f, 0.17f, // Inner left
+	0.9f, 0.45f, 0.17f, // Inner right
+	0.8f, 0.3f,  0.02f  // Inner down
+};
 
     glGenVertexArrays(1, &scop->VAO);
     glBindVertexArray(scop->VAO);
 
     glGenBuffers(1, &scop->VBO);
     glBindBuffer(GL_ARRAY_BUFFER, scop->VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+  //  glBufferData(GL_ARRAY_BUFFER, scop->object.nbVertices * sizeof(t_vertex), scop->object.vertices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glGenBuffers(1, &scop->EBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, scop->EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+  //  glBufferData(GL_ELEMENT_ARRAY_BUFFER, scop->object.nbTriangleIndices * 3 * sizeof(GLuint), scop->object.triangleIndices, GL_STATIC_DRAW);
+
 	glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
+    GLuint colorbuffer;
+    glGenBuffers(1, &colorbuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(color), color, GL_STATIC_DRAW);
+
+	glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 int main(int ac, char **av) {
@@ -158,6 +211,7 @@ int main(int ac, char **av) {
     if (!initWindow(&scop) || !initShaders(&scop))
         return (-1);
     initVertex(&scop);
+    scopScaleID = glGetUniformLocation(scop.programShader, "scale");
     mainLoop(&scop);
     return (0);
 }

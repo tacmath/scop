@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include <string.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -22,11 +23,11 @@ typedef struct s_vertex t_vertex;
 struct s_object {
     char        *mtllib;
     t_vertex    *vertices;
-    size_t      nbVertices;
+    GLuint      nbVertices;
     GLuint      *squareIndices;
-    size_t      nbSquareIndices;
+    GLuint      nbSquareIndices;
     GLuint      *triangleIndices;
-    size_t      nbTriangleIndices;
+    GLuint      nbTriangleIndices;
 };
 
 typedef struct s_object t_object;
@@ -35,7 +36,7 @@ struct s_scop {
     GLFWwindow  *window;
     GLuint      VAO;
     GLuint      VBO;
-    GLuint      VBE;
+    GLuint      EBO;
     GLuint      programShader;
     t_object    object;
 };
