@@ -76,6 +76,7 @@ int initWindow(t_scop *scop) {
         return (0);
     }
     glfwMakeContextCurrent(scop->window);
+//    glViewport(0, 0, 400, 300);
     if (glewInit() != GLEW_OK)
         return (0);
 //    scop->monitor = glfwGetWindowMonitor(scop->window);	
@@ -85,19 +86,64 @@ int initWindow(t_scop *scop) {
 }
 
 void mainLoop(t_scop *scop) {
+    GLuint modelloc = glGetUniformLocation(scop->programShader, "model");
+    GLuint viewloc = glGetUniformLocation(scop->programShader, "view");
+    GLuint projloc = glGetUniformLocation(scop->programShader, "proj");
+
+    float rotation = 0;
+    double prevTime = glfwGetTime();
+
     glBindVertexArray(scop->VAO);
     glUseProgram(scop->programShader);
     glUniform1f(scopScaleID, scopScaleValue);
+    glEnable(GL_DEPTH_TEST);
 
     while ( glfwGetKey(scop->window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
             glfwWindowShouldClose(scop->window) == 0 ) {
-        glfwPollEvents();
+
+
+        double crtTime = glfwGetTime();
+        if (crtTime - prevTime >=  1 / 60) {
+            prevTime = crtTime;
+            rotation += 0.3f;
+        }
 
         glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        t_mat4 tmp = IDENTITY_MAT4;
+        t_mat4 res = IDENTITY_MAT4;
+
+        t_mat4 model = IDENTITY_MAT4;
+        t_mat4 view = IDENTITY_MAT4;
+        t_mat4 proj = IDENTITY_MAT4;
+
+        rotate(tmp, rotation, (t_vertex){0.0f, 1.0f, 0.0f}, &model);
+       /* rotate(model, rotation, (t_vertex){1.0f, 0.0f, 0.0f}, &tmp);
+        memcpy(&model, &tmp, sizeof(t_mat4));
+        rotate(model, rotation, (t_vertex){0.0f, 0.0f, 1.0f}, &tmp);
+        memcpy(&model, &tmp, sizeof(t_mat4));*/
+        mat4Traslate(&view, (t_vertex){0.0f, -0.5f, -2.0f});
+       // printMat4(view);
+     /*   mat4Scale(&tmp, (t_vertex){0.2f, 0.2f, 0.2f});
+        mat4Mult(tmp, model, &res);
+        memcpy(&model, &res, sizeof(t_mat4));*/
+       // mat4Traslate(&model, (t_vertex){0.0f, -10.0f, 0.0f});
+        perspective(45.0f, (float)(400.0f/300.0f), 0.1f, 100.0f, &proj);
+       // printMat4(proj);
+      /*  mat4Mult(view, proj, &res);
+        memcpy(&view, &res, sizeof(t_mat4));
+        mat4Mult(model, view, &res);
+        memcpy(&model, &res, sizeof(t_mat4));*/
+ 
+
+
+        glUniformMatrix4fv(modelloc, 1, GL_FALSE, (GLfloat*)model);
+        glUniformMatrix4fv(viewloc, 1, GL_FALSE, (GLfloat*)view);
+        glUniformMatrix4fv(projloc, 1, GL_FALSE, (GLfloat*)proj);
 		//glDrawElements(GL_TRIANGLES, scop->object.nbTriangleIndices * 3, GL_UNSIGNED_INT, 0);
-        glDrawElements(GL_TRIANGLES, 9, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, 18, GL_UNSIGNED_INT, 0);
 		glfwSwapBuffers(scop->window);
+        glfwPollEvents();
     }
 }
 
@@ -145,23 +191,27 @@ int initShaders(t_scop *scop) {
 }
 
 void initVertex(t_scop *scop) {
+// Vertices coordinates
 GLfloat vertices[] =
-{
-    -0.5f, -0.5f * sqrt(3) / 3, 0.0f, // Lower left corner
-    0.5f, -0.5f * sqrt(3) / 3, 0.0f, // Lower right corner
-    0.0f, 0.5f * sqrt(3) * 2 / 3, 0.0f, // Upper corner
-    -0.5f / 2, 0.5f * sqrt(3) / 6, 0.0f, // Inner left
-    0.5f / 2, 0.5f * sqrt(3) / 6, 0.0f, // Inner right
-    0.0f, -0.5f * sqrt(3) / 3, 0.0f // Inner down
+{ //     COORDINATES   
+	-0.5f, 0.0f,  0.5f,
+	-0.5f, 0.0f, -0.5f,
+	 0.5f, 0.0f, -0.5f,
+	 0.5f, 0.0f,  0.5f,
+	 0.0f, 0.8f,  0.0f,
 };
 
 // Indices for vertices order
 GLuint indices[] =
 {
-    0, 3, 5, // Lower left triangle
-    3, 2, 4, // Lower right triangle
-    5, 4, 1 // Upper triangle
+	0, 1, 2,
+	0, 2, 3,
+	0, 1, 4,
+	1, 2, 4,
+	2, 3, 4,
+	3, 0, 4
 };
+// Indices for vertices order
 
 GLfloat color[] =
 { //               COORDINATES                  /     COLORS           //
@@ -170,7 +220,6 @@ GLfloat color[] =
 	1.0f, 0.6f,  0.32f, // Upper corner
 	0.9f, 0.45f, 0.17f, // Inner left
 	0.9f, 0.45f, 0.17f, // Inner right
-	0.8f, 0.3f,  0.02f  // Inner down
 };
 
     glGenVertexArrays(1, &scop->VAO);
@@ -179,12 +228,12 @@ GLfloat color[] =
     glGenBuffers(1, &scop->VBO);
     glBindBuffer(GL_ARRAY_BUFFER, scop->VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-  //  glBufferData(GL_ARRAY_BUFFER, scop->object.nbVertices * sizeof(t_vertex), scop->object.vertices, GL_STATIC_DRAW);
+ //   glBufferData(GL_ARRAY_BUFFER, scop->object.nbVertices * sizeof(t_vertex), scop->object.vertices, GL_STATIC_DRAW);
 
     glGenBuffers(1, &scop->EBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, scop->EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-  //  glBufferData(GL_ELEMENT_ARRAY_BUFFER, scop->object.nbTriangleIndices * 3 * sizeof(GLuint), scop->object.triangleIndices, GL_STATIC_DRAW);
+ //   glBufferData(GL_ELEMENT_ARRAY_BUFFER, scop->object.nbTriangleIndices * 3 * sizeof(GLuint), scop->object.triangleIndices, GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);

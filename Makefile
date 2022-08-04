@@ -1,14 +1,14 @@
 NAME = scop
 SRCDIR = srcs/
 INCDIR = includes/
-SRCFILES = main.c
+SRCFILES = main.c matrix.c
 
 INCFILES = scop.h
 SRC = $(addprefix $(SRCDIR),$(SRCFILES))
 INC = $(addprefix $(INCDIR),$(INCFILES))
 OBJ = $(SRC:.c=.o)
 FLAG = -I includes #  -I /Users/mtaquet/.brew/Cellar/glew/2.2.0_1/include/ -I /Users/mtaquet/.brew/Cellar/glfw/3.3.8/include 
-LINK = -lglfw -lGLEW -lGL # -L/Users/mtaquet/.brew/Cellar/glew/2.2.0_1/lib -L/Users/mtaquet/.brew/Cellar/glfw/3.3.8/lib
+LINK = -lglfw -lGLEW -lGL -lm # -L/Users/mtaquet/.brew/Cellar/glew/2.2.0_1/lib -L/Users/mtaquet/.brew/Cellar/glfw/3.3.8/lib
 
 all: $(NAME)
 
