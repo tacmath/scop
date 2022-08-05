@@ -26,12 +26,15 @@ void setMatrix(GLuint matrixLoc, float rotation) {
 
 void mainLoop(t_scop *scop) {
     GLuint matrixLoc = glGetUniformLocation(scop->programShader, "matrix");
+    GLuint tex0Uni = glGetUniformLocation(scop->programShader, "tex0");
 
     float rotation = 0;
     double prevTime = glfwGetTime();
 
     glBindVertexArray(scop->VAO);
+    glBindTexture(GL_TEXTURE_2D, scop->textureID);
     glUseProgram(scop->programShader);
+    glUniform1i(tex0Uni, 0);
     glEnable(GL_DEPTH_TEST);
 
     while ( glfwGetKey(scop->window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&

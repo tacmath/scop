@@ -7,6 +7,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <math.h>
+#include <stb/stb_image.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -39,11 +40,21 @@ struct s_object {
 
 typedef struct s_object t_object;
 
+struct s_texture {
+    unsigned char   *data;       
+    int             x;
+    int             y;
+    int             numColCh;
+};
+
+typedef struct s_texture t_texture;
+
 struct s_scop {
     GLFWwindow  *window;
     GLuint      VAO;
-    GLuint      VBO;
-    GLuint      EBO;
+//    GLuint      VBO;
+//    GLuint      EBO;
+    GLuint      textureID;
     GLuint      programShader;
     t_object    object;
 };

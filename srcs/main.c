@@ -1,6 +1,10 @@
 #include "scop.h" 
 
 void initVertex(t_scop *scop) {
+
+
+
+    
 // Vertices coordinates
 GLfloat vertices[] =
 { //     COORDINATES   
@@ -32,16 +36,26 @@ GLfloat color[] =
 	0.9f, 0.45f, 0.17f, // Inner right
 };
 
+GLfloat texture[] =
+{ //     COORDINATES   
+	0.0f, 0.0f,         //bot front left
+	1.0f, 0.0f,         //bot back left
+	0.0f, 0.0f,         //bot back right
+	1.0f, 0.0f,         //bot front right
+	0.5f, 2.0f,         //top
+};
+
+    GLuint VBO, EBO;
     glGenVertexArrays(1, &scop->VAO);
     glBindVertexArray(scop->VAO);
 
-    glGenBuffers(1, &scop->VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, scop->VBO);
+    glGenBuffers(1, &VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
  //   glBufferData(GL_ARRAY_BUFFER, scop->object.nbVertices * sizeof(t_vertex), scop->object.vertices, GL_STATIC_DRAW);
 
-    glGenBuffers(1, &scop->EBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, scop->EBO);
+    glGenBuffers(1, &EBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
  //   glBufferData(GL_ELEMENT_ARRAY_BUFFER, scop->object.nbTriangleIndices * 3 * sizeof(GLuint), scop->object.triangleIndices, GL_STATIC_DRAW);
 
@@ -56,9 +70,37 @@ GLfloat color[] =
 	glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
+    GLuint textbuffer;
+    glGenBuffers(1, &textbuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, textbuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(texture), texture, GL_STATIC_DRAW);
+
+	glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+void textureInit(t_scop *scop, char *fileName) {
+    t_texture texture;
+
+    stbi_set_flip_vertically_on_load(1);
+    texture.data = stbi_load(fileName, &texture.x, &texture.y, &texture.numColCh, 0);
+    glGenTextures(1, &scop->textureID);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, scop->textureID);
+    glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture.x, texture.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture.data);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    stbi_image_free(texture.data);
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 int main(int ac, char **av) {
@@ -66,10 +108,12 @@ int main(int ac, char **av) {
 
     if (ac > 1)
         getObjectData(&scop.object, av[1]);
-
     if (!initWindow(&scop) || !initShaders(&scop))
         return (-1);
+
+    textureInit(&scop, "texture/pop_cat.png");
     initVertex(&scop);
     mainLoop(&scop);
+    glDeleteTextures(1, &scop.textureID);
     return (0);
 }
