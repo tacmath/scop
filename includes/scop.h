@@ -50,11 +50,30 @@ struct s_scop {
 
 typedef struct s_scop t_scop;
 
+//  matrix.c
+
 void mat4Traslate(t_mat4 *matrice, t_vertex vector);
 void perspective(float fov, float ratio, float near, float far, t_mat4 *result);
 void rotate(t_mat4 matrix, float angle, t_vertex vector, t_mat4 *result);
 void mat4Scale(t_mat4 *result, t_vertex vector);
 void mat4Mult(t_mat4 mat1, t_mat4 mat2, t_mat4 *result);
 void printMat4(t_mat4 mat4);
+
+//  loop.c
+
+void mainLoop(t_scop *scop);
+
+//  parce.c
+
+int getObjectData(t_object *object, char *fileName);
+
+//  utils.c
+
+char *getShaderSource(char *fileName);
+
+//  init.c
+
+int initWindow(t_scop *scop);
+int initShaders(t_scop *scop);
 
 #endif

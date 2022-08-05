@@ -1,7 +1,12 @@
 NAME = scop
 SRCDIR = srcs/
 INCDIR = includes/
-SRCFILES = main.c matrix.c
+SRCFILES =	main.c \
+			matrix.c \
+			loop.c \
+			init.c \
+			parse.c \
+			utils.c \
 
 INCFILES = scop.h
 SRC = $(addprefix $(SRCDIR),$(SRCFILES))
