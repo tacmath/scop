@@ -1,5 +1,6 @@
 #include "scop.h" 
 
+extern float cameraPosZ;
 
 void setMatrix(GLuint matrixLoc, float rotation) {
     t_mat4 matrix = IDENTITY_MAT4;
@@ -11,7 +12,7 @@ void setMatrix(GLuint matrixLoc, float rotation) {
 
     rotate(matrix, rotation, (t_vertex){0.0f, 1.0f, 0.0f}, &model);
 
-    mat4Traslate(&view, (t_vertex){0.0f, -0.5f, -2.0f});
+    mat4Traslate(&view, (t_vertex){0.0f, -0.5f, cameraPosZ});
 
     perspective(45.0f, (float)(400.0f/300.0f), 0.1f, 100.0f, &proj);
 
@@ -31,7 +32,7 @@ void mainLoop(t_scop *scop) {
     float rotation = 0;
     double prevTime = glfwGetTime();
 
-    glBindVertexArray(scop->VAO);
+    glBindVertexArray(scop->object.VAO);
     glBindTexture(GL_TEXTURE_2D, scop->textureID);
     glUseProgram(scop->programShader);
     glUniform1i(tex0Uni, 0);
@@ -51,8 +52,9 @@ void mainLoop(t_scop *scop) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         setMatrix(matrixLoc, rotation);
-		//glDrawElements(GL_TRIANGLES, scop->object.nbTriangleIndices * 3, GL_UNSIGNED_INT, 0);
-        glDrawElements(GL_TRIANGLES, 18, GL_UNSIGNED_INT, 0);
+    //    glDrawArrays(GL_POINTS, 0, scop->mesh.nbVertices);
+        glDrawElements(GL_TRIANGLES, scop->object.indicesNb , GL_UNSIGNED_INT, 0);
+    //    glDrawElements(GL_POINTS, scop->mesh.nbTriangleIndices * 3, GL_UNSIGNED_INT, scop->mesh.triangleIndices);
 		glfwSwapBuffers(scop->window);
         glfwPollEvents();
         usleep(2000);

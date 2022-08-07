@@ -28,7 +28,7 @@ struct s_vertex {
 
 typedef struct s_vertex t_vertex;
 
-struct s_object {
+struct s_mesh {
     char        *mtllib;
     t_vertex    *vertices;
     GLuint      nbVertices;
@@ -38,7 +38,7 @@ struct s_object {
     GLuint      nbTriangleIndices;
 };
 
-typedef struct s_object t_object;
+typedef struct s_mesh t_mesh;
 
 struct s_texture {
     unsigned char   *data;       
@@ -49,6 +49,23 @@ struct s_texture {
 
 typedef struct s_texture t_texture;
 
+struct s_array {
+    void    *data;
+    size_t  size;
+};
+
+typedef struct s_array t_array;
+
+struct s_object {
+    GLuint      VAO;
+    size_t      indicesNb;
+    GLuint      textureID;
+    GLuint      programShader;
+};
+
+typedef struct s_object t_object;
+
+
 struct s_scop {
     GLFWwindow  *window;
     GLuint      VAO;
@@ -57,6 +74,7 @@ struct s_scop {
     GLuint      textureID;
     GLuint      programShader;
     t_object    object;
+    t_mesh      mesh;
 };
 
 typedef struct s_scop t_scop;
@@ -76,7 +94,7 @@ void mainLoop(t_scop *scop);
 
 //  parce.c
 
-int getObjectData(t_object *object, char *fileName);
+int getObjectData(t_mesh *object, char *fileName);
 
 //  utils.c
 
@@ -85,6 +103,6 @@ char *getShaderSource(char *fileName);
 //  init.c
 
 int initWindow(t_scop *scop);
-int initShaders(t_scop *scop);
+GLuint initShaders(char *vertexShaderFile, char *fragmentShaderFile);
 
 #endif

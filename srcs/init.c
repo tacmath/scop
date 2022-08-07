@@ -1,4 +1,14 @@
-#include "scop.h" 
+#include "scop.h"
+
+float cameraPosZ = -2.0;
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+    if (yoffset > 0)
+        cameraPosZ += 0.5f;
+    else if (yoffset < 0)
+        cameraPosZ -= 0.5f;
+}
 
 int initWindow(t_scop *scop) {
     if( !glfwInit() )
@@ -18,14 +28,14 @@ int initWindow(t_scop *scop) {
         return (0);
 //    scop->monitor = glfwGetWindowMonitor(scop->window);	
     glfwSetInputMode(scop->window, GLFW_STICKY_KEYS, GL_TRUE);
-//    glfwSetScrollCallback(scop->window, scroll_callback);
+    glfwSetScrollCallback(scop->window, scroll_callback);
     return (1);
 }
 
-int initShaders(t_scop *scop) {
-    const char* vertexShaderSource = getShaderSource("shaders/vertexShader");
-    const char* fragmentShaderSource = getShaderSource("shaders/fragmentShader");
-   // printf("\n %s \n%s\n",vertexShaderSource, fragmentShaderSource);
+GLuint initShaders(char *vertexShaderFile, char *fragmentShaderFile) {
+    const char* vertexShaderSource = getShaderSource(vertexShaderFile);
+    const char* fragmentShaderSource = getShaderSource(fragmentShaderFile);
+  //  printf("\n %s \n%s\n",vertexShaderSource, fragmentShaderSource);
     if (!vertexShaderSource || !fragmentShaderSource)
         return (0);
 
@@ -37,14 +47,14 @@ int initShaders(t_scop *scop) {
 	glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
 	glCompileShader(fragmentShader);
 
-	scop->programShader = glCreateProgram();
-	glAttachShader(scop->programShader, vertexShader);
-	glAttachShader(scop->programShader, fragmentShader);
-	glLinkProgram(scop->programShader);
+	GLuint programShader = glCreateProgram();
+	glAttachShader(programShader, vertexShader);
+	glAttachShader(programShader, fragmentShader);
+	glLinkProgram(programShader);
 
     free((void*)vertexShaderSource);
     free((void*)fragmentShaderSource);
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
-    return (1);
+    return (programShader);
 }

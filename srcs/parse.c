@@ -1,16 +1,54 @@
 #include "scop.h" 
+/*
+float vertMax(t_vertex *vert) {
+    return (vert->x + vert->y + vert->z);
+}
 
-int getObjectData(t_object *object, char *fileName) {
+void splitSquare(t_mesh *object, GLuint *indices) {
+    float min;
+    int minIdx = 0;
+    float max;
+    int maxIdx = 0;
+    float ret;
+    int m;
+
+    min = vertMax(&object->vertices[indices[0] - 1]);
+    max = min;
+    for (int n = 1; n < 4; n++) {
+        ret = vertMax(&object->vertices[indices[n] - 1]);
+        if (ret > max) {
+            max = ret;
+            maxIdx = n;
+        }
+        if (ret < min) {
+            min = ret;
+            minIdx = n;
+        }
+    }
+
+    m = 0;
+    for (int n = 0; n < 4; n++)
+        if (n != maxIdx)
+            object->triangleIndices[object->nbTriangleIndices * 3 + m++] = indices[n];
+    object->nbTriangleIndices++;
+    m = 0;
+    for (int n = 0; n < 4; n++)
+        if (n != minIdx)
+            object->triangleIndices[object->nbTriangleIndices * 3 + m++] = indices[n];
+    object->nbTriangleIndices++;
+}*/
+
+int getObjectData(t_mesh *object, char *fileName) {
     FILE *file;
     char buffer[256];
-    int  indices[4];
+    GLuint  indices[4];
     t_vertex    vertex;
     int ret;
 
     ret = 0;
     if (!(file = fopen(fileName, "r")))
         return (0);
-    bzero(object, sizeof(t_object));
+    bzero(object, sizeof(t_mesh));
     while (1) {
         ret = fscanf(file, "%s", buffer);
         if (ret == EOF) {
@@ -20,8 +58,10 @@ int getObjectData(t_object *object, char *fileName) {
             for (int n = 0; n < object->nbTriangleIndices; n++)
                 printf("%d,  %d, %d\n", object->triangleIndices[n * 3], object->triangleIndices[n * 3 + 1], object->triangleIndices[n * 3 + 2]);
             for (int n = 0; n < object->nbSquareIndices; n++)
-            printf("%d,  %d, %d, %d\n", object->squareIndices[n * 4], object->squareIndices[n * 4 + 1], object->squareIndices[n * 4 + 2], object->squareIndices[n * 4 + 3]);
-           */ return (1);
+            printf("%d,  %d, %d, %d\n", object->squareIndices[n * 4], object->squareIndices[n * 4 + 1], object->squareIndices[n * 4 + 2], object->squareIndices[n * 4 + 3]);*/
+            for (int n = 0; n < object->nbTriangleIndices * 3; n++)
+                object->triangleIndices[n] -= 1;
+            return (1);
         }
         if (!strcmp(buffer, "v")) {
             object->vertices = realloc(object->vertices, sizeof(t_vertex) * (object->nbVertices + 1));
@@ -35,8 +75,11 @@ int getObjectData(t_object *object, char *fileName) {
                 memcpy(&object->triangleIndices[object->nbTriangleIndices++ * 3], indices, sizeof(GLuint) * 3);
             }
             else {
-                object->squareIndices = realloc(object->squareIndices, sizeof(GLuint) * (object->nbSquareIndices + 1) * 4);
-                memcpy(&object->squareIndices[object->nbSquareIndices++ * 4], indices, sizeof(GLuint) * 4);
+                object->triangleIndices = realloc(object->triangleIndices, sizeof(GLuint) * (object->nbTriangleIndices + 2) * 3);
+                memcpy(&object->triangleIndices[object->nbTriangleIndices++ * 3], indices, sizeof(GLuint) * 3);
+            //    memcpy(&object->triangleIndices[object->nbTriangleIndices++ * 3], &indices[1], sizeof(GLuint) * 3);
+                memcpy(&object->triangleIndices[object->nbTriangleIndices * 3], indices, sizeof(GLuint) * 3);
+                object->triangleIndices[(object->nbTriangleIndices++ * 3) + 1] = indices[3];
             }
         }
         else if (!strcmp(buffer, "mtllib")) {
