@@ -29,13 +29,12 @@ struct s_vertex {
 typedef struct s_vertex t_vertex;
 
 struct s_mesh {
-    char        *mtllib;
     t_vertex    *vertices;
     GLuint      nbVertices;
-    GLuint      *squareIndices;
-    GLuint      nbSquareIndices;
-    GLuint      *triangleIndices;
-    GLuint      nbTriangleIndices;
+    GLuint      *Indices;
+    GLuint      nbIndices;
+    t_vertex    min;
+    t_vertex    max;
 };
 
 typedef struct s_mesh t_mesh;
@@ -58,7 +57,7 @@ typedef struct s_array t_array;
 
 struct s_object {
     GLuint      VAO;
-    size_t      indicesNb;
+    t_mesh      mesh;
     GLuint      textureID;
     GLuint      programShader;
 };
@@ -68,13 +67,9 @@ typedef struct s_object t_object;
 
 struct s_scop {
     GLFWwindow  *window;
-    GLuint      VAO;
-//    GLuint      VBO;
-//    GLuint      EBO;
     GLuint      textureID;
     GLuint      programShader;
     t_object    object;
-    t_mesh      mesh;
 };
 
 typedef struct s_scop t_scop;
@@ -94,7 +89,7 @@ void mainLoop(t_scop *scop);
 
 //  parce.c
 
-int getObjectData(t_mesh *object, char *fileName);
+int getObjectData(t_mesh *mesh, char *fileName);
 
 //  utils.c
 

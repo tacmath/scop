@@ -4,13 +4,17 @@ extern float cameraPosZ;
 
 void setMatrix(GLuint matrixLoc, float rotation) {
     t_mat4 matrix = IDENTITY_MAT4;
+//    t_mat4 test = IDENTITY_MAT4;
     t_mat4 model = IDENTITY_MAT4;
     t_mat4 view = IDENTITY_MAT4;
     t_mat4 proj = IDENTITY_MAT4;
 
-    //mat4Traslate(&matrix, (t_vertex){0.0f, 0.0f, -1.0f});
+   
 
     rotate(matrix, rotation, (t_vertex){0.0f, 1.0f, 0.0f}, &model);
+  /*  mat4Traslate(&matrix, (t_vertex){0.0f, 0.0f, -1.5f});
+    mat4Mult(model, matrix, &test);
+    memcpy(&model, &test, sizeof(t_mat4));*/
 
     mat4Traslate(&view, (t_vertex){0.0f, -0.5f, cameraPosZ});
 
@@ -53,7 +57,7 @@ void mainLoop(t_scop *scop) {
 
         setMatrix(matrixLoc, rotation);
     //    glDrawArrays(GL_POINTS, 0, scop->mesh.nbVertices);
-        glDrawElements(GL_TRIANGLES, scop->object.indicesNb , GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, scop->object.mesh.nbIndices , GL_UNSIGNED_INT, 0);
     //    glDrawElements(GL_POINTS, scop->mesh.nbTriangleIndices * 3, GL_UNSIGNED_INT, scop->mesh.triangleIndices);
 		glfwSwapBuffers(scop->window);
         glfwPollEvents();

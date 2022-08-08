@@ -23,7 +23,7 @@ GLuint indices[] =
 	3, 0, 4
 };
 // Indices for vertices order
-
+/*
 GLfloat color[] =
 { //               COORDINATES                  /     COLORS           //
 	0.8f, 0.3f,  0.02f, // Lower left corner
@@ -40,12 +40,11 @@ GLfloat texture[] =
 	0.0f, 0.0f,         //bot back right
 	1.0f, 0.0f,         //bot front right
 	0.5f, 2.0f,         //top
-};
+};*/
 
     GLuint VBO, EBO;
-    glGenVertexArrays(1, &scop->VAO);
-    scop->object.VAO = scop->VAO;
-    glBindVertexArray(scop->VAO);
+    glGenVertexArrays(1, &scop->object.VAO);
+    glBindVertexArray(scop->object.VAO);
 
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -54,11 +53,11 @@ GLfloat texture[] =
     glGenBuffers(1, &EBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-    scop->object.indicesNb = sizeof(indices);
+    scop->object.mesh.nbIndices = sizeof(indices);
  
 	glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-
+/*
     GLuint colorbuffer;
     glGenBuffers(1, &colorbuffer);
     glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
@@ -74,7 +73,7 @@ GLfloat texture[] =
 
 	glEnableVertexAttribArray(2);
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
-
+*/
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -127,16 +126,15 @@ int main(int ac, char **av) {
     t_scop scop;
 
     if (ac > 1)
-        getObjectData(&scop.mesh, av[1]);
+        getObjectData(&scop.object.mesh, av[1]);
     if (!initWindow(&scop) ||
         !(scop.programShader = initShaders("shaders/vertexShader", "shaders/fragmentShader")))
         return (-1);
 
     textureInit(&scop, "texture/pop_cat.png");
     if (ac > 1) {
-        scop.object.indicesNb = scop.mesh.nbTriangleIndices * 3;
-        scop.object.VAO = initVertexArray((t_array){scop.mesh.vertices, scop.mesh.nbVertices},
-                        (t_array){scop.mesh.triangleIndices, scop.object.indicesNb});
+        scop.object.VAO = initVertexArray((t_array){scop.object.mesh.vertices, scop.object.mesh.nbVertices},
+                        (t_array){scop.object.mesh.Indices, scop.object.mesh.nbIndices});
     }
     else
         initVertex(&scop);
