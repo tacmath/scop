@@ -70,6 +70,7 @@ struct s_scop {
     GLuint      textureID;
     GLuint      programShader;
     t_object    object;
+    t_mat4      projection;
 };
 
 typedef struct s_scop t_scop;

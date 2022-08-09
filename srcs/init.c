@@ -1,6 +1,6 @@
 #include "scop.h"
 
-float cameraPosZ = -2.0;
+float cameraPosZ = 0;
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {

@@ -138,6 +138,7 @@ int main(int ac, char **av) {
     }
     else
         initVertex(&scop);
+    perspective(45.0f, (float)(400.0f/300.0f), 0.1f, 100.0f, &scop.projection);
     mainLoop(&scop);
     glDeleteTextures(1, &scop.textureID);
     return (0);
