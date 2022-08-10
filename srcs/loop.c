@@ -49,32 +49,24 @@ void mainLoop(t_scop *scop) {
     GLuint matrixLoc = glGetUniformLocation(scop->programShader, "matrix");
     GLuint tex0Uni = glGetUniformLocation(scop->programShader, "tex0");
 
-//    float rotation = 0;
-//    double prevTime = glfwGetTime();
 
-    glBindVertexArray(scop->object.VAO);
     glBindTexture(GL_TEXTURE_2D, scop->textureID);
-    glUseProgram(scop->programShader);
     glUniform1i(tex0Uni, 0);
     glEnable(GL_DEPTH_TEST);
 
     while ( glfwGetKey(scop->window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
             glfwWindowShouldClose(scop->window) == 0 ) {
-
-
-    /*    double crtTime = glfwGetTime();
-        if (crtTime - prevTime >=  1 / 60) {
-            prevTime = crtTime;
-            rotation += 0.5f;
-        }*/
-
-        glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClear(GL_DEPTH_BUFFER_BIT);
 
         setMatrix(scop, matrixLoc, &scop->object.rotation);
-    //    glDrawArrays(GL_POINTS, 0, scop->mesh.nbVertices);
+        glDisable(GL_DEPTH_TEST);
+        glUseProgram(scop->background.programShader);
+        glBindVertexArray(scop->background.VAO);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glEnable(GL_DEPTH_TEST);
+        glUseProgram(scop->programShader);
+        glBindVertexArray(scop->object.VAO);
         glDrawElements(GL_TRIANGLES, scop->object.mesh.nbIndices , GL_UNSIGNED_INT, 0);
-    //    glDrawElements(GL_POINTS, scop->mesh.nbTriangleIndices * 3, GL_UNSIGNED_INT, scop->mesh.triangleIndices);
 		glfwSwapBuffers(scop->window);
         getEvents(scop);
         usleep(2000);

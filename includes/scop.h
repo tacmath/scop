@@ -78,6 +78,7 @@ struct s_scop {
     GLuint      textureID;
     GLuint      programShader;
     t_position  mouse;
+    t_object    background;
     t_object    object;
     t_mat4      projection;
 };
