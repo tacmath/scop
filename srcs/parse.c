@@ -19,8 +19,8 @@ void getMeshBorders(t_mesh *mesh) {
         if (mesh->vertices[n].z < mesh->min.z)
             mesh->min.z = mesh->vertices[n].z;
     }
-    printf("min = %f %f %f\n", mesh->min.x, mesh->min.y, mesh->min.z);
-    printf("max = %f %f %f\n", mesh->max.x, mesh->max.y, mesh->max.z);
+/*    printf("min = %f %f %f\n", mesh->min.x, mesh->min.y, mesh->min.z);
+    printf("max = %f %f %f\n", mesh->max.x, mesh->max.y, mesh->max.z);*/
 }
 
 int getObjectData(t_mesh *mesh, char *fileName) {

@@ -28,6 +28,13 @@ struct s_vertex {
 
 typedef struct s_vertex t_vertex;
 
+struct s_position {
+    double x;
+    double y;
+};
+
+typedef struct s_position t_position;
+
 struct s_mesh {
     t_vertex    *vertices;
     GLuint      nbVertices;
@@ -58,6 +65,7 @@ typedef struct s_array t_array;
 struct s_object {
     GLuint      VAO;
     t_mesh      mesh;
+    t_vertex    rotation;
     GLuint      textureID;
     GLuint      programShader;
 };
@@ -69,6 +77,7 @@ struct s_scop {
     GLFWwindow  *window;
     GLuint      textureID;
     GLuint      programShader;
+    t_position  mouse;
     t_object    object;
     t_mat4      projection;
 };

@@ -2,7 +2,7 @@
 
 extern float cameraPosZ;
 
-void setMatrix(t_scop *scop, GLuint matrixLoc, float rotation) {
+void setMatrix(t_scop *scop, GLuint matrixLoc, t_vertex *rotation) {
     t_mat4 matrix = IDENTITY_MAT4;
     t_mat4 test = IDENTITY_MAT4;
     t_mat4 model = IDENTITY_MAT4;
@@ -10,12 +10,14 @@ void setMatrix(t_scop *scop, GLuint matrixLoc, float rotation) {
 
    
 
-    rotate(matrix, rotation, (t_vertex){0.0f, 1.0f, 0.0f}, &model);
-    mat4Traslate(&matrix, (t_vertex){0.0f, 0.0f, - ((scop->object.mesh.max.z - scop->object.mesh.min.z) / 2) - scop->object.mesh.min.z});
+    rotate(matrix, rotation->y, (t_vertex){0.0f, 1.0f, 0.0f}, &model);
+    rotate(model, rotation->x, (t_vertex){1.0f, 0.0f, 0.0f}, &test);
+    memcpy(&model, &test, sizeof(t_mat4));
+    mat4Traslate(&matrix, (t_vertex){0.0f, - ((scop->object.mesh.max.y - scop->object.mesh.min.y) / 2) - scop->object.mesh.min.y, - ((scop->object.mesh.max.z - scop->object.mesh.min.z) / 2) - scop->object.mesh.min.z});
     mat4Mult(model, matrix, &test);
     memcpy(&model, &test, sizeof(t_mat4));
 
-    mat4Traslate(&view, (t_vertex){0.0f, - ((scop->object.mesh.max.y - scop->object.mesh.min.y) / 2) - scop->object.mesh.min.y, cameraPosZ - (scop->object.mesh.max.y - scop->object.mesh.min.y) * 2});
+    mat4Traslate(&view, (t_vertex){0.0f,0.0f /*- ((scop->object.mesh.max.y - scop->object.mesh.min.y) / 2) - scop->object.mesh.min.y*/, cameraPosZ - (scop->object.mesh.max.y - scop->object.mesh.min.y) * 2});
 
     mat4Mult(scop->projection, view, &matrix);
     memcpy(&view, &matrix, sizeof(t_mat4));
@@ -26,12 +28,29 @@ void setMatrix(t_scop *scop, GLuint matrixLoc, float rotation) {
     glUniformMatrix4fv(matrixLoc, 1, GL_TRUE, (GLfloat*)matrix);
 }
 
+void getEvents(t_scop *scop) {
+     int state;
+     double posx, posy;
+    
+    glfwPollEvents();
+    state = glfwGetMouseButton(scop->window, GLFW_MOUSE_BUTTON_LEFT);
+    glfwGetCursorPos(scop->window, &posx, &posy);
+    if (state == GLFW_PRESS)
+    {
+        scop->object.rotation.y += posx - scop->mouse.x;
+        scop->object.rotation.x += posy - scop->mouse.y;
+    //    printf("x = %f, y = %f\n", posx, posy);
+    }
+    scop->mouse.x = posx;
+    scop->mouse.y = posy;
+}
+
 void mainLoop(t_scop *scop) {
     GLuint matrixLoc = glGetUniformLocation(scop->programShader, "matrix");
     GLuint tex0Uni = glGetUniformLocation(scop->programShader, "tex0");
 
-    float rotation = 0;
-    double prevTime = glfwGetTime();
+//    float rotation = 0;
+//    double prevTime = glfwGetTime();
 
     glBindVertexArray(scop->object.VAO);
     glBindTexture(GL_TEXTURE_2D, scop->textureID);
@@ -43,21 +62,21 @@ void mainLoop(t_scop *scop) {
             glfwWindowShouldClose(scop->window) == 0 ) {
 
 
-        double crtTime = glfwGetTime();
+    /*    double crtTime = glfwGetTime();
         if (crtTime - prevTime >=  1 / 60) {
             prevTime = crtTime;
             rotation += 0.5f;
-        }
+        }*/
 
         glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        setMatrix(scop, matrixLoc, rotation);
+        setMatrix(scop, matrixLoc, &scop->object.rotation);
     //    glDrawArrays(GL_POINTS, 0, scop->mesh.nbVertices);
         glDrawElements(GL_TRIANGLES, scop->object.mesh.nbIndices , GL_UNSIGNED_INT, 0);
     //    glDrawElements(GL_POINTS, scop->mesh.nbTriangleIndices * 3, GL_UNSIGNED_INT, scop->mesh.triangleIndices);
 		glfwSwapBuffers(scop->window);
-        glfwPollEvents();
+        getEvents(scop);
         usleep(2000);
     }
 }

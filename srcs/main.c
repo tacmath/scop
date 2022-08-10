@@ -125,6 +125,7 @@ void textureInit(t_scop *scop, char *fileName) {
 int main(int ac, char **av) {
     t_scop scop;
 
+    bzero(&scop, sizeof(t_scop));
     if (ac > 1)
         getObjectData(&scop.object.mesh, av[1]);
     if (!initWindow(&scop) ||
