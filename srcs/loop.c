@@ -47,8 +47,17 @@ void getEvents(t_scop *scop) {
 
 void mainLoop(t_scop *scop) {
     GLuint matrixLoc = glGetUniformLocation(scop->programShader, "matrix");
+    GLuint ObjectSizeLoc = glGetUniformLocation(scop->programShader, "Osize");
+    GLuint ObjectMinLoc = glGetUniformLocation(scop->programShader, "Omin");
     GLuint tex0Uni = glGetUniformLocation(scop->programShader, "tex0");
+    t_vertex objectSize =   {scop->object.mesh.max.x - scop->object.mesh.min.x,
+                            scop->object.mesh.max.y - scop->object.mesh.min.y,
+                            scop->object.mesh.max.z - scop->object.mesh.min.z};
 
+    glUseProgram(scop->programShader);
+
+    glUniform3fv(ObjectSizeLoc, 1, (void*)(&objectSize));
+    glUniform3fv(ObjectMinLoc, 1, (void*)(&scop->object.mesh.min));
 
     glBindTexture(GL_TEXTURE_2D, scop->textureID);
     glUniform1i(tex0Uni, 0);
