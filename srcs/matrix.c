@@ -43,31 +43,25 @@ void perspective(float fov, float ratio, float near, float far, t_mat4 *result) 
     memcpy(result, &matrix, sizeof(t_mat4));
 }
 
+void normalise(t_vertex *vector) {
+    float normal = sqrt(vector->x * vector->x + vector->y * vector->y + vector->z * vector->z);
+
+    vector->x /= normal;
+    vector->y /= normal;
+    vector->z /= normal;
+}
+
 void rotate(t_mat4 matrix, float angle, t_vertex vector, t_mat4 *result) {
-    float co = cosf((PI / 180.0f) * angle);
-    float si = sinf((PI / 180.0f) * angle);
-    if (vector.x) {
-        if (vector.x < 0) si = -si;
-        t_mat4 rmatrix =    {{1,  0,  0,  0}
-                            ,{0, co,-si,  0}
-                            ,{0, si, co,  0}
-                            ,{0,  0,  0,  1}};
-        mat4Mult(matrix, rmatrix, result);
-    }
-    else if (vector.y) {
-        if (vector.y < 0) si = -si;
-        t_mat4 rmatrix =    {{co, 0, si,  0}
-                            ,{0,  1,  0,  0}
-                            ,{-si,0, co,  0}
-                            ,{0,  0,  0,  1}};
-        mat4Mult(matrix, rmatrix, result);
-    }
-    else if (vector.z) {
-        if (vector.z < 0) si = -si;
-        t_mat4 rmatrix =    {{co,-si, 0,  0}
-                            ,{si,co,  0,  0}
-                            ,{0,  0,  1,  0}
-                            ,{0,  0,  0,  1}};
-        mat4Mult(matrix, rmatrix, result);
-    }
+    float c = cosf((PI / 180.0f) * angle);
+    float s = sinf((PI / 180.0f) * angle);
+    normalise(&vector);
+    float x = vector.x;
+    float y = vector.y;
+    float z = vector.z;
+    float rc = 1 - c;
+    t_mat4 rmatrix =    {{x*x*rc+c,     x*y*rc-z*s, x*z*rc+y*s, 0}
+                        ,{y*x*rc+z*s,   y*y*rc+c,   y*z*rc-x*s, 0}
+                        ,{x*z*rc-y*s,   y*z*rc+x*s, z*z*rc+c,   0}
+                        ,{0,            0,          0,          1}};
+    mat4Mult(matrix, rmatrix, result);
 }

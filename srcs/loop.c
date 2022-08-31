@@ -31,15 +31,17 @@ void setMatrix(t_scop *scop, GLuint matrixLoc, t_vertex *rotation) {
 void getEvents(t_scop *scop) {
      int state;
      double posx, posy;
+
     
     glfwPollEvents();
     state = glfwGetMouseButton(scop->window, GLFW_MOUSE_BUTTON_LEFT);
     glfwGetCursorPos(scop->window, &posx, &posy);
     if (state == GLFW_PRESS)
     {
-        scop->object.rotation.y += posx - scop->mouse.x;
-        scop->object.rotation.x += posy - scop->mouse.y;
-    //    printf("x = %f, y = %f\n", posx, posy);
+        if (abs(scop->object.rotation.y + posx - scop->mouse.x) < 90)
+            scop->object.rotation.y += posx - scop->mouse.x;
+        if (abs(scop->object.rotation.x + posy - scop->mouse.y) < 90)
+            scop->object.rotation.x += posy - scop->mouse.y;
     }
     scop->mouse.x = posx;
     scop->mouse.y = posy;

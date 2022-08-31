@@ -16,7 +16,7 @@
 
 # define   PI           3.14159265358979323846 
 
-#define IDENTITY_MAT4 {{1,0,0,0},{0,1,0,0},{0,0,1,0},{0,0,0,1}};
+#define IDENTITY_MAT4 {{1.0f,0.0f,0.0f,0.0f},{0.0f,1.0f,0.0f,0.0f},{0.0f,0.0f,1.0f,0.0f},{0.0f,0.0f,0.0f,1.0f}};
 
 typedef GLfloat t_mat4[4][4];
 
