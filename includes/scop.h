@@ -7,14 +7,15 @@
 #include <string.h>
 #include <unistd.h>
 #include <math.h>
-#include <stb/stb_image.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-# define   PI           3.14159265358979323846 
+# define   PI           3.14159265358979323846
+# define WINDOW_WIDTH   400.0
+# define WINDOW_HEIGHT  300.0
 
 #define IDENTITY_MAT4 {{1.0f,0.0f,0.0f,0.0f},{0.0f,1.0f,0.0f,0.0f},{0.0f,0.0f,1.0f,0.0f},{0.0f,0.0f,0.0f,1.0f}};
 
@@ -105,10 +106,13 @@ int getObjectData(t_mesh *mesh, char *fileName);
 //  utils.c
 
 char *getShaderSource(char *fileName);
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
 //  init.c
 
 int initWindow(t_scop *scop);
 GLuint initShaders(char *vertexShaderFile, char *fragmentShaderFile);
+GLuint initVertexArray(t_array vertices, t_array indices);
+int textureInit(t_scop *scop, char *fileName);
 
 #endif

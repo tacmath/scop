@@ -23,7 +23,7 @@ void setMatrix(t_scop *scop, GLuint matrixLoc, t_vertex *rotation) {
     memcpy(&view, &matrix, sizeof(t_mat4));
     mat4Mult(view, model, &matrix);
 
-   // printMat4(matrix);
+//    printMat4(matrix);
 
     glUniformMatrix4fv(matrixLoc, 1, GL_TRUE, (GLfloat*)matrix);
 }
@@ -38,9 +38,9 @@ void getEvents(t_scop *scop) {
     glfwGetCursorPos(scop->window, &posx, &posy);
     if (state == GLFW_PRESS)
     {
-        if (abs(scop->object.rotation.y + posx - scop->mouse.x) < 90)
+        if (fabs(scop->object.rotation.y + posx - scop->mouse.x) < 90)
             scop->object.rotation.y += posx - scop->mouse.x;
-        if (abs(scop->object.rotation.x + posy - scop->mouse.y) < 90)
+        if (fabs(scop->object.rotation.x + posy - scop->mouse.y) < 90)
             scop->object.rotation.x += posy - scop->mouse.y;
     }
     scop->mouse.x = posx;
