@@ -3,10 +3,13 @@
 #include "stb_image.h" 
 
 int initWindow(t_scop *scop) {
+    char path[1024];
+    getcwd(path, 1024);
     if(!glfwInit()) {
         dprintf(2, "Glfw failed to init\n");
         return (0);
     }
+    chdir(path);
     glfwWindowHint(GLFW_SAMPLES, 4); // 4x antialiasing
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);

@@ -37,6 +37,7 @@ int getObjectData(t_mesh *mesh, char *fileName) {
     while (1) {
         ret = fscanf(file, "%s", buffer);
         if (ret == EOF) {
+            fclose(file);
             getMeshBorders(mesh);
             for (int n = 0; n < mesh->nbIndices; n++)
                 mesh->Indices[n] -= 1;
