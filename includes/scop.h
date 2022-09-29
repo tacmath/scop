@@ -16,6 +16,7 @@
 # define   PI           3.14159265358979323846
 # define WINDOW_WIDTH   400.0
 # define WINDOW_HEIGHT  300.0
+# define MAX_FPS        60
 
 #define IDENTITY_MAT4 {{1.0f,0.0f,0.0f,0.0f},{0.0f,1.0f,0.0f,0.0f},{0.0f,0.0f,1.0f,0.0f},{0.0f,0.0f,0.0f,1.0f}};
 
@@ -76,8 +77,6 @@ typedef struct s_object t_object;
 
 struct s_scop {
     GLFWwindow  *window;
-    GLuint      textureID;
-    GLuint      programShader;
     t_position  mouse;
     t_object    background;
     t_object    object;
@@ -97,6 +96,7 @@ void printMat4(t_mat4 mat4);
 
 //  loop.c
 
+void setMatrix(t_scop *scop, GLuint matrixLoc, t_vertex *rotation);
 void mainLoop(t_scop *scop);
 
 //  parce.c
@@ -113,6 +113,16 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 int initWindow(t_scop *scop);
 GLuint initShaders(char *vertexShaderFile, char *fragmentShaderFile);
 GLuint initVertexArray(t_array vertices, t_array indices);
-int textureInit(t_scop *scop, char *fileName);
+GLuint textureInit(t_scop *scop, char *fileName);
+
+//  event.c
+
+void getEvents(t_scop *scop);
+
+//  draw.c
+
+void initUniforms(t_object *object);
+void drawBackground(t_scop *scop);
+void drawObject(t_scop *scop, GLuint matrixLoc);
 
 #endif

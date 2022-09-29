@@ -81,17 +81,18 @@ GLuint initVertexArray(t_array vertices, t_array indices) {
     return (VAO);
 }
 
-int textureInit(t_scop *scop, char *fileName) {
-    t_texture texture;
+GLuint textureInit(t_scop *scop, char *fileName) {
+    t_texture   texture;
+    GLuint      textureID;
 
     stbi_set_flip_vertically_on_load(1);
     if (!(texture.data = stbi_load(fileName, &texture.x, &texture.y, &texture.numColCh, 0))) {
         dprintf(2, "Failed to load %s\n", fileName);
         return (0);
     }
-    glGenTextures(1, &scop->textureID);
+    glGenTextures(1, &textureID);
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, scop->textureID);
+    glBindTexture(GL_TEXTURE_2D, textureID);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -101,6 +102,6 @@ int textureInit(t_scop *scop, char *fileName) {
     glGenerateMipmap(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, 0);
     stbi_image_free(texture.data);
-    return (1);
+    return (textureID);
 
 }

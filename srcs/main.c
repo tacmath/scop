@@ -1,6 +1,6 @@
 #include "scop.h" 
 
-void initBackground(t_scop *scop) {
+int initBackground(t_scop *scop) {
 
     GLfloat vertices[] =
     { //     COORDINATES   
@@ -36,7 +36,10 @@ void initBackground(t_scop *scop) {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
-    scop->background.programShader = initShaders("shaders/backgroundVS", "shaders/backgroundFS");
+    if (!(scop->background.programShader = initShaders("shaders/backgroundVS", "shaders/backgroundFS")) ||
+        !(scop->background.textureID = textureInit(scop, "texture/pop_cat.png")))
+        return (0);
+    return (1);
 }
 
 int main(int ac, char **av) {
@@ -48,8 +51,8 @@ int main(int ac, char **av) {
     else
         return (-1);
     if (!initWindow(&scop) ||
-        !(scop.programShader = initShaders("shaders/vertexShader", "shaders/fragmentShader")) ||
-        !textureInit(&scop, "texture/pop_cat.png"))
+        !(scop.object.programShader = initShaders("shaders/vertexShader", "shaders/fragmentShader")) ||
+        !initBackground(&scop))
         return (-1);
     if (ac > 1) {
         scop.object.VAO = initVertexArray((t_array){scop.object.mesh.vertices, scop.object.mesh.nbVertices},
@@ -58,8 +61,7 @@ int main(int ac, char **av) {
         free(scop.object.mesh.Indices);
     }
     perspective(45.0f, (float)(WINDOW_WIDTH/WINDOW_HEIGHT), 0.1f, 100.0f, &scop.projection);
-    initBackground(&scop);
     mainLoop(&scop);
-    glDeleteTextures(1, &scop.textureID);
+    glDeleteTextures(1, &scop.background.textureID);
     return (0);
 }
