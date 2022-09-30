@@ -7,18 +7,10 @@ void setMatrix(t_scop *scop, GLuint matrixLoc, t_vertex *rotation) {
     t_mat4 test = IDENTITY_MAT4;
     t_mat4 model = IDENTITY_MAT4;
     t_mat4 view = IDENTITY_MAT4;
-    double x = rotation->x * cos(scop->object.rotation.y * (PI / 180.0f));
-    double z = rotation->x * sin(scop->object.rotation.y * (PI / 180.0f));
    
-   /* if (x + z > 90) {
-        x *= (90 / (z + x));
-        z *= (90 / (z + x));
-    }*/
     rotate(matrix, rotation->y, (t_vertex){0.0f, 1.0f, 0.0f}, &model);
-    rotate(model, x, (t_vertex){1.0f, 0.0f, 0.0f}, &test);
-    rotate(test, z, (t_vertex){0.0f, 0.0f, 1.0f}, &model);
-  //  printf("roty = %f rotx = %f rotz = %f\n", rotation->y, x, z);
-    //memcpy(&model, &test, sizeof(t_mat4));
+    rotate(model, rotation->x, (t_vertex){cos(scop->object.rotation.y * (PI / 180.0f)), 0.0f, sin(scop->object.rotation.y * (PI / 180.0f))}, &test);
+    memcpy(&model, &test, sizeof(t_mat4));
     mat4Traslate(&matrix, (t_vertex){
                 /*- ((scop->object.mesh.max.x - scop->object.mesh.min.x) / 2) - scop->object.mesh.min.x*/0.0f,
                 - ((scop->object.mesh.max.y - scop->object.mesh.min.y) / 2) - scop->object.mesh.min.y,
