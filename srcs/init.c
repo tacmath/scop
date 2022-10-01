@@ -89,7 +89,7 @@ GLuint textureInit(char *fileName, char *path) {
 
     stbi_set_flip_vertically_on_load(1);
     fileName = ft_strjoin(path, fileName);
-    if (!(texture.data = stbi_load(fileName, &texture.x, &texture.y, &texture.numColCh, 0))) {
+    if (!(texture.data = stbi_load(fileName, &texture.x, &texture.y, &texture.numColCh, 4))) {
         dprintf(2, "Failed to load %s\n", fileName);
         free(fileName);
         return (0);

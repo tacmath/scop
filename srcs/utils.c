@@ -29,7 +29,24 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 }
 
 void printUsage() {
-    printf("Usage : ./scop [OPTION]... FILE.obj\n");
+    printf("Usage  : ./scop [OPTION]... FILE.obj\n\n");
+    printf("option :\n");
+    printf("  -t  TEXTURE_FILE\n");
+}
+
+char *getOption(char *option, int ac, char **av, char *object) {
+    int n;
+
+    n = 0;
+    while (++n < ac) {
+        if (!strcmp(option, av[n])) {
+            if (n + 1 < ac && strcmp(av[n + 1], object))
+                return (av[n + 1]);
+            else
+                return (0);
+        }
+    }
+    return (0);
 }
 
 char *getObjectFile(int ac, char **av) {
@@ -38,7 +55,7 @@ char *getObjectFile(int ac, char **av) {
 
     n = 0;
     while (++n < ac) {
-        ret = strchr(av[n], '.');
+        ret = strrchr(av[n], '.');
         if (ret && !strcmp(ret, ".obj"))
             return (av[n]);
     }

@@ -42,21 +42,35 @@ int initBackground(t_scop *scop) {
     return (1);
 }
 
+int parseArguments(int ac, char **av, t_scop  *scop) {
+    char    *objectFile;
+    
+    scop->path = strrchr(av[0], '/');
+    scop->path[1] = 0;
+    scop->path = av[0];
+    if (!(objectFile = getObjectFile(ac, av)) ||
+        !getObjectData(&scop->object.mesh, objectFile)) {
+        printUsage();
+        return (0);
+    }
+    scop->option.texture = getOption("-t", ac, av, objectFile);
+    return (1);
+}
+
 int main(int ac, char **av) {
     t_scop  scop;
-    char    *objectFile;
 
     bzero(&scop, sizeof(t_scop));
-    scop.path = strrchr(av[0], '/');
-    scop.path[1] = 0;
-    scop.path = av[0];
-    if (!(objectFile = getObjectFile(ac, av)) || !getObjectData(&scop.object.mesh, objectFile)) {
-        printUsage();
-        return (-1);
-    }
-    if (!initWindow(&scop) ||
-        !(scop.object.programShader = initShaders("shaders/vertexShader", "shaders/fragmentShader", scop.path)) ||
+    if (!parseArguments(ac, av, &scop) ||
+        !initWindow(&scop) ||
         !initBackground(&scop))
+        return (-1);
+    if (!scop.option.texture) {
+        if (!(scop.object.programShader = initShaders("shaders/vertexShader", "shaders/fragmentShader", scop.path)))
+            return (-1);
+    }
+    else if (!(scop.object.programShader = initShaders("shaders/vertexShader", "shaders/textureFS", scop.path)) ||
+        !(scop.object.textureID = textureInit(scop.option.texture, scop.path)))
         return (-1);
     scop.object.VAO = initVertexArray((t_array){scop.object.mesh.vertices, scop.object.mesh.nbVertices},
                     (t_array){scop.object.mesh.Indices, scop.object.mesh.nbIndices});

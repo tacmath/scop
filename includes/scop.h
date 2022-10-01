@@ -17,7 +17,7 @@
 # define WINDOW_WIDTH   400.0
 # define WINDOW_HEIGHT  300.0
 # define MAX_FPS        60
-# define BACKGROUND_IMAGE "texture/pop_cat.png"
+# define BACKGROUND_IMAGE "texture/plaines.jpeg"
 
 #define IDENTITY_MAT4 {{1.0f,0.0f,0.0f,0.0f},{0.0f,1.0f,0.0f,0.0f},{0.0f,0.0f,1.0f,0.0f},{0.0f,0.0f,0.0f,1.0f}};
 
@@ -75,10 +75,16 @@ struct s_object {
 
 typedef struct s_object t_object;
 
+struct s_option {
+    char        *texture;
+};
+
+typedef struct s_option t_option;
 
 struct s_scop {
     GLFWwindow  *window;
     char        *path;
+    t_option    option;
     t_position  mouse;
     t_object    background;
     t_object    object;
@@ -112,6 +118,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void printUsage();
 char *getObjectFile(int ac, char **av);
 char *ft_strjoin(char const *s1, char const *s2);
+char *getOption(char *option, int ac, char **av, char *object);
 
 //  init.c
 

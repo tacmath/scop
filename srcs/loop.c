@@ -29,14 +29,15 @@ void setMatrix(t_scop *scop, GLuint matrixLoc, t_vertex *rotation) {
 
 void mainLoop(t_scop *scop) {
     GLuint matrixLoc =  glGetUniformLocation(scop->object.programShader, "matrix");
-    GLuint tex0Uni =    glGetUniformLocation(scop->background.programShader, "tex0");
+    GLuint backgroundTexUni =    glGetUniformLocation(scop->background.programShader, "backgroundTex");
     double oldTime = glfwGetTime();
     double newTime;
    
     glUseProgram(scop->background.programShader);
     glBindTexture(GL_TEXTURE_2D, scop->background.textureID);
-    glUniform1i(tex0Uni, 0);
+    glUniform1i(backgroundTexUni, 0);
     initUniforms(&scop->object);
+    glBindTexture(GL_TEXTURE_2D, scop->background.textureID);
     while ( glfwGetKey(scop->window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
             glfwWindowShouldClose(scop->window) == 0 ) {
         glClear(GL_DEPTH_BUFFER_BIT);

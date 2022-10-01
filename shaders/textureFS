@@ -1,0 +1,14 @@
+#version 400 core
+out vec4 FragColor;
+
+in vec3 pos;
+
+uniform vec3 Osize;
+uniform vec3 Omin;
+
+uniform sampler2D tex0;
+
+void main()
+{
+      FragColor = texture(tex0, vec2(((pos.x - Omin.x + pos.z) / (Osize.x)), (pos.y / Osize.y)));
+}
