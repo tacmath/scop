@@ -18,13 +18,11 @@ void setMatrix(t_scop *scop, GLuint matrixLoc, t_vertex *rotation) {
     mat4Mult(model, matrix, &test);
     memcpy(&model, &test, sizeof(t_mat4));
 
-    mat4Traslate(&view, (t_vertex){0.0f,0.0f /*- ((scop->object.mesh.max.y - scop->object.mesh.min.y) / 2) - scop->object.mesh.min.y*/, cameraPosZ - (scop->object.mesh.max.y - scop->object.mesh.min.y) * 2});
+    mat4Traslate(&view, (t_vertex){0.0f, 0.0f, cameraPosZ - (scop->object.mesh.max.y - scop->object.mesh.min.y) * 2});
 
     mat4Mult(scop->projection, view, &matrix);
     memcpy(&view, &matrix, sizeof(t_mat4));
     mat4Mult(view, model, &matrix);
-
-//    printMat4(matrix);
 
     glUniformMatrix4fv(matrixLoc, 1, GL_TRUE, (GLfloat*)matrix);
 }

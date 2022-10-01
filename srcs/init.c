@@ -32,9 +32,11 @@ int initWindow(t_scop *scop) {
     return (1);
 }
 
-GLuint initShaders(char *vertexShaderFile, char *fragmentShaderFile) {
-    const char* vertexShaderSource = getShaderSource(vertexShaderFile);
-    const char* fragmentShaderSource = getShaderSource(fragmentShaderFile);
+GLuint initShaders(char *vertexShaderFile, char *fragmentShaderFile, char *path) {
+    const char* vertexShaderSource = getShaderSource((vertexShaderFile = ft_strjoin(path, vertexShaderFile)));
+    const char* fragmentShaderSource = getShaderSource((fragmentShaderFile = ft_strjoin(path, fragmentShaderFile)));
+    free(vertexShaderFile);
+    free(fragmentShaderFile);
     if (!vertexShaderSource || !fragmentShaderSource)
         return (0);
 
@@ -81,15 +83,18 @@ GLuint initVertexArray(t_array vertices, t_array indices) {
     return (VAO);
 }
 
-GLuint textureInit(t_scop *scop, char *fileName) {
+GLuint textureInit(char *fileName, char *path) {
     t_texture   texture;
     GLuint      textureID;
 
     stbi_set_flip_vertically_on_load(1);
+    fileName = ft_strjoin(path, fileName);
     if (!(texture.data = stbi_load(fileName, &texture.x, &texture.y, &texture.numColCh, 0))) {
         dprintf(2, "Failed to load %s\n", fileName);
+        free(fileName);
         return (0);
     }
+    free(fileName);
     glGenTextures(1, &textureID);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, textureID);

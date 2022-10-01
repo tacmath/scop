@@ -27,3 +27,34 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
     else if (yoffset < 0)
         cameraPosZ -= 0.5f;
 }
+
+void printUsage() {
+    printf("Usage : ./scop [OPTION]... FILE.obj\n");
+}
+
+char *getObjectFile(int ac, char **av) {
+    int n;
+    char *ret;
+
+    n = 0;
+    while (++n < ac) {
+        ret = strchr(av[n], '.');
+        if (ret && !strcmp(ret, ".obj"))
+            return (av[n]);
+    }
+    return (0);
+}
+
+char *ft_strjoin(char const *s1, char const *s2)
+{
+	int		len = strlen(s1);
+	char	*str;
+
+	if (!(s1 && s2))
+		return (0);
+	if (!(str = malloc(sizeof(char) * (len + strlen(s2) + 1))))
+		return (0);
+    memcpy(str, s1, len);
+    strcpy(str + len, s2);
+	return (str);
+}

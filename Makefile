@@ -1,6 +1,6 @@
 NAME = scop
 SRCDIR = srcs/
-OBJDIR = obj/
+OBJDIR = .obj/
 INCDIR = includes/
 SRCFILES =	main.c \
 			matrix.c \

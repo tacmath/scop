@@ -36,30 +36,32 @@ int initBackground(t_scop *scop) {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
-    if (!(scop->background.programShader = initShaders("shaders/backgroundVS", "shaders/backgroundFS")) ||
-        !(scop->background.textureID = textureInit(scop, "texture/pop_cat.png")))
+    if (!(scop->background.programShader = initShaders("shaders/backgroundVS", "shaders/backgroundFS", scop->path)) ||
+        !(scop->background.textureID = textureInit(BACKGROUND_IMAGE, scop->path)))
         return (0);
     return (1);
 }
 
 int main(int ac, char **av) {
-    t_scop scop;
+    t_scop  scop;
+    char    *objectFile;
 
     bzero(&scop, sizeof(t_scop));
-    if (ac > 1)
-        getObjectData(&scop.object.mesh, av[1]);
-    else
+    scop.path = strrchr(av[0], '/');
+    scop.path[1] = 0;
+    scop.path = av[0];
+    if (!(objectFile = getObjectFile(ac, av)) || !getObjectData(&scop.object.mesh, objectFile)) {
+        printUsage();
         return (-1);
+    }
     if (!initWindow(&scop) ||
-        !(scop.object.programShader = initShaders("shaders/vertexShader", "shaders/fragmentShader")) ||
+        !(scop.object.programShader = initShaders("shaders/vertexShader", "shaders/fragmentShader", scop.path)) ||
         !initBackground(&scop))
         return (-1);
-    if (ac > 1) {
-        scop.object.VAO = initVertexArray((t_array){scop.object.mesh.vertices, scop.object.mesh.nbVertices},
-                        (t_array){scop.object.mesh.Indices, scop.object.mesh.nbIndices});
-        free(scop.object.mesh.vertices);
-        free(scop.object.mesh.Indices);
-    }
+    scop.object.VAO = initVertexArray((t_array){scop.object.mesh.vertices, scop.object.mesh.nbVertices},
+                    (t_array){scop.object.mesh.Indices, scop.object.mesh.nbIndices});
+    free(scop.object.mesh.vertices);
+    free(scop.object.mesh.Indices);
     perspective(45.0f, (float)(WINDOW_WIDTH/WINDOW_HEIGHT), 0.1f, 100.0f, &scop.projection);
     mainLoop(&scop);
     glDeleteTextures(1, &scop.background.textureID);
