@@ -14,10 +14,10 @@
 #include <GLFW/glfw3.h>
 
 # define   PI           3.14159265358979323846
-# define WINDOW_WIDTH   400.0
-# define WINDOW_HEIGHT  300.0
+# define WINDOW_WIDTH   2000.0
+# define WINDOW_HEIGHT  1200.0
 # define MAX_FPS        60
-# define BACKGROUND_IMAGE "texture/plaines.jpeg"
+# define BACKGROUND_IMAGE "texture/wallpaperbetter.com_5120x2880.jpg"
 
 #define IDENTITY_MAT4 {{1.0f,0.0f,0.0f,0.0f},{0.0f,1.0f,0.0f,0.0f},{0.0f,0.0f,1.0f,0.0f},{0.0f,0.0f,0.0f,1.0f}};
 
@@ -31,18 +31,32 @@ struct s_vertex {
 
 typedef struct s_vertex t_vertex;
 
+struct s_vec2 {
+    GLfloat x;
+    GLfloat y;
+};
+
+typedef struct s_vec2 t_vec2;
+
 struct s_position {
-    double x;
-    double y;
+    GLfloat x;
+    GLfloat y;
 };
 
 typedef struct s_position t_position;
 
+struct s_array {
+    void    *data;
+    size_t  size;
+};
+
+typedef struct s_array t_array;
+
 struct s_mesh {
-    t_vertex    *vertices;
-    GLuint      nbVertices;
-    GLuint      *Indices;
-    GLuint      nbIndices;
+    t_array     vertices;
+    t_array     uvs;
+    t_array     normales;
+    t_array     indices;
     t_vertex    min;
     t_vertex    max;
 };
@@ -57,13 +71,6 @@ struct s_texture {
 };
 
 typedef struct s_texture t_texture;
-
-struct s_array {
-    void    *data;
-    size_t  size;
-};
-
-typedef struct s_array t_array;
 
 struct s_object {
     GLuint      VAO;

@@ -72,10 +72,9 @@ int main(int ac, char **av) {
     else if (!(scop.object.programShader = initShaders("shaders/vertexShader", "shaders/textureFS", scop.path)) ||
         !(scop.object.textureID = textureInit(scop.option.texture, scop.path)))
         return (-1);
-    scop.object.VAO = initVertexArray((t_array){scop.object.mesh.vertices, scop.object.mesh.nbVertices},
-                    (t_array){scop.object.mesh.Indices, scop.object.mesh.nbIndices});
-    free(scop.object.mesh.vertices);
-    free(scop.object.mesh.Indices);
+    scop.object.VAO = initVertexArray(scop.object.mesh.vertices, scop.object.mesh.indices);
+    free(scop.object.mesh.vertices.data);
+    free(scop.object.mesh.indices.data);
     perspective(45.0f, (float)(WINDOW_WIDTH/WINDOW_HEIGHT), 0.1f, 100.0f, &scop.projection);
     mainLoop(&scop);
     glDeleteTextures(1, &scop.background.textureID);

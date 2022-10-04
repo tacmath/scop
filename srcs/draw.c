@@ -32,5 +32,5 @@ void drawObject(t_scop *scop, GLuint matrixLoc) {
     setMatrix(scop, matrixLoc, &scop->object.rotation);
     glBindVertexArray(scop->object.VAO);
     glBindTexture(GL_TEXTURE_2D, scop->object.textureID);
-    glDrawElements(GL_TRIANGLES, scop->object.mesh.nbIndices , GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, scop->object.mesh.indices.size , GL_UNSIGNED_INT, 0);
 }
