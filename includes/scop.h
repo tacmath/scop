@@ -14,10 +14,11 @@
 #include <GLFW/glfw3.h>
 
 # define   PI           3.14159265358979323846
-# define WINDOW_WIDTH   2000.0
-# define WINDOW_HEIGHT  1200.0
+# define WINDOW_WIDTH   400.0
+# define WINDOW_HEIGHT  300.0
 # define MAX_FPS        60
-# define BACKGROUND_IMAGE "texture/wallpaperbetter.com_5120x2880.jpg"
+# define BACKGROUND_IMAGE "texture/plaines.jpeg"
+# define DEFAULT_TEXTURE "texture/test.jpeg"
 
 #define IDENTITY_MAT4 {{1.0f,0.0f,0.0f,0.0f},{0.0f,1.0f,0.0f,0.0f},{0.0f,0.0f,1.0f,0.0f},{0.0f,0.0f,0.0f,1.0f}};
 
@@ -92,6 +93,7 @@ struct s_scop {
     GLFWwindow  *window;
     char        *path;
     t_option    option;
+    GLfloat     transition;
     t_position  mouse;
     t_object    background;
     t_object    object;

@@ -30,7 +30,8 @@ void setMatrix(t_scop *scop, GLuint matrixLoc, t_vertex *rotation) {
 
 void mainLoop(t_scop *scop) {
     GLuint matrixLoc =  glGetUniformLocation(scop->object.programShader, "matrix");
-    GLuint backgroundTexUni =    glGetUniformLocation(scop->background.programShader, "backgroundTex");
+    GLuint backgroundTexUni = glGetUniformLocation(scop->background.programShader, "backgroundTex");
+    GLuint transitionLoc = glGetUniformLocation(scop->object.programShader, "transition");
     double oldTime = glfwGetTime();
     double newTime;
    
@@ -38,7 +39,6 @@ void mainLoop(t_scop *scop) {
     glBindTexture(GL_TEXTURE_2D, scop->background.textureID);
     glUniform1i(backgroundTexUni, 0);
     initUniforms(&scop->object);
-    glBindTexture(GL_TEXTURE_2D, scop->background.textureID);
     while ( glfwGetKey(scop->window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
             glfwWindowShouldClose(scop->window) == 0 ) {
         glClear(GL_DEPTH_BUFFER_BIT);
@@ -46,6 +46,7 @@ void mainLoop(t_scop *scop) {
         drawObject(scop, matrixLoc);
 		glfwSwapBuffers(scop->window);
         getEvents(scop);
+        glUniform1f(transitionLoc, scop->transition);
         newTime = glfwGetTime();
         if ((newTime - oldTime) * 1000000 < (1000000.0 / MAX_FPS))
             usleep((1000000.0 / MAX_FPS) - (newTime - oldTime) * 100000);

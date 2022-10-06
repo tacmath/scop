@@ -12,10 +12,8 @@ void initUniforms(t_object *object) {
 
     glUniform3fv(ObjectSizeLoc, 1, (void*)(&objectSize));
     glUniform3fv(ObjectMinLoc, 1, (void*)(&object->mesh.min));
-    if (object->textureID) {
-        glBindTexture(GL_TEXTURE_2D, object->textureID);
-        glUniform1i(tex0Uni, 0);
-    }
+    glBindTexture(GL_TEXTURE_2D, object->textureID);
+    glUniform1i(tex0Uni, 0);
 }
 
 void drawBackground(t_scop *scop) {

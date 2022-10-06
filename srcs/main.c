@@ -53,7 +53,8 @@ int parseArguments(int ac, char **av, t_scop  *scop) {
         printUsage();
         return (0);
     }
-    scop->option.texture = getOption("-t", ac, av, objectFile);
+    if (!(scop->option.texture = getOption("-t", ac, av, objectFile)))
+        scop->option.texture = DEFAULT_TEXTURE;
     return (1);
 }
 
@@ -65,17 +66,13 @@ int main(int ac, char **av) {
         !initWindow(&scop) ||
         !initBackground(&scop))
         return (-1);
-    if (!scop.option.texture) {
-        if (!(scop.object.programShader = initShaders("shaders/vertexShader", "shaders/fragmentShader", scop.path)))
-            return (-1);
-    }
-    else if (!(scop.object.programShader = initShaders("shaders/vertexShader", "shaders/textureFS", scop.path)) ||
+    if (!(scop.object.programShader = initShaders("shaders/vertexShader", "shaders/fragmentShader", scop.path)) ||
         !(scop.object.textureID = textureInit(scop.option.texture, scop.path)))
         return (-1);
     scop.object.VAO = initVertexArray(scop.object.mesh.vertices, scop.object.mesh.indices);
     free(scop.object.mesh.vertices.data);
     free(scop.object.mesh.indices.data);
-    perspective(45.0f, (float)(WINDOW_WIDTH/WINDOW_HEIGHT), 0.1f, 100.0f, &scop.projection);
+    perspective(45.0f, (float)(WINDOW_WIDTH/WINDOW_HEIGHT), 0.1f, 1000.0f, &scop.projection);
     mainLoop(&scop);
     glDeleteTextures(1, &scop.background.textureID);
     return (0);

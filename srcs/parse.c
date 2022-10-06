@@ -26,9 +26,15 @@ void getMeshBorders(t_mesh *mesh) {
 
 void getIndices(FILE *file, t_mesh *mesh) {
     GLuint  indices[4];
+    char    buffer[4][30];
+    char    line[256];
     int ret;
 
-    ret = fscanf(file, "%d %d %d %d\n", &indices[0], &indices[1], &indices[2], &indices[3]);
+    fscanf(file, "%[^\n]", line);
+    if ((ret = sscanf(line, "%s %s %s %s\n", buffer[0], buffer[1], buffer[2], buffer[3])) < 3)
+        return;
+    for (int n = 0; n < ret; n++)
+        sscanf(buffer[n], "%d/", &indices[n]);
     mesh->indices.data = realloc(mesh->indices.data, sizeof(GLuint) * (mesh->indices.size + 3 + (3 * (ret == 4))));
     memcpy(&((GLuint*)mesh->indices.data)[mesh->indices.size], indices, sizeof(GLuint) * 3);
     mesh->indices.size += 3;
