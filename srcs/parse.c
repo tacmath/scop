@@ -106,6 +106,8 @@ int indexMeshData(t_mesh *mesh) {
     mesh->normales.data = newNormales;
     mesh->uvs.data = newUvs;
     mesh->vertices.size = mesh->indices.size;
+    mesh->uvs.size = mesh->indices.size;
+    mesh->normales.size = mesh->indices.size;
     mesh->indices.size = 0;
     free(mesh->indices.data);
     mesh->indices.data = 0;
@@ -130,25 +132,41 @@ int parseIndices(t_mesh *mesh) {
     return (1);
 }
 
+void parseMtllib(t_mesh *mesh, char *path) {
+    FILE *file;
+    char *fileName;
+    char buffer[256];
+
+    if (!mesh->mltFile)
+        return ;
+    if ((fileName = strrchr(path, '/'))) {
+        fileName[1] = 0;
+        fileName = ft_strjoin(path, mesh->mltFile);
+        free(mesh->mltFile);
+    }
+    else
+        fileName = mesh->mltFile;
+    if (!(file = fopen(fileName, "r")))
+        return ;
+    free(fileName);
+    while (fscanf(file, "%s", buffer) != EOF) {
+        if (!strcmp(buffer, "map_Kd")) {
+            fscanf(file, "%s\n", buffer);
+            mesh->textureFile = ft_strjoin(path, buffer);
+            break ;
+        }
+    }
+    fclose(file);
+}
+
 int getObjectData(t_mesh *mesh, char *fileName) {
     FILE *file;
     char buffer[256];
-    int ret;
 
-    ret = 0;
     if (!(file = fopen(fileName, "r")))
         return (0);
     bzero(mesh, sizeof(t_mesh));
-    while (1) {
-        ret = fscanf(file, "%s", buffer);
-        if (ret == EOF) {
-            fclose(file);
-            getMeshBorders(mesh);
-            if (!parseIndices(mesh))
-                return (0);
-            //printObjectData(mesh);
-            return (1);
-        }
+    while (fscanf(file, "%s", buffer) != EOF) {
         if (!strcmp(buffer, "v"))
             getVertices(file, &mesh->vertices);
         else if (!strcmp(buffer, "vt"))
@@ -157,7 +175,18 @@ int getObjectData(t_mesh *mesh, char *fileName) {
             getVertices(file, &mesh->normales);
         else if (!strcmp(buffer, "f"))
             getIndices(file, mesh);
+        else if (!strcmp(buffer, "mtllib")) {
+            fscanf(file, "%s\n", buffer);
+            mesh->mltFile = strdup(buffer);
+        }
         else
             fscanf(file, "\n");
     }
+    fclose(file);
+    getMeshBorders(mesh);
+    if (!parseIndices(mesh))
+        return (0);
+    parseMtllib(mesh, fileName);
+    //printObjectData(mesh);
+    return (1);
 }

@@ -1,6 +1,7 @@
 #include "scop.h" 
 
 float cameraPosZ = 0;
+extern float ObjectSize;
 
 char *getShaderSource(char *fileName) {
     char    *source;
@@ -23,9 +24,9 @@ char *getShaderSource(char *fileName) {
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
     if (yoffset > 0)
-        cameraPosZ += 0.5f;
+        cameraPosZ += 0.2 * ObjectSize;
     else if (yoffset < 0)
-        cameraPosZ -= 0.5f;
+        cameraPosZ -= 0.2 * ObjectSize;
 }
 
 void printUsage() {

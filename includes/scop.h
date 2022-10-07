@@ -143,8 +143,12 @@ char *getOption(char *option, int ac, char **av, char *object);
 
 int initWindow(t_scop *scop);
 GLuint initShaders(char *vertexShaderFile, char *fragmentShaderFile, char *path);
-GLuint initVertexArray(t_array vertices, t_array indices);
 GLuint textureInit(char *fileName, char *path);
+
+// VAO.c
+GLuint initVertexArray(t_array vertices);
+void initElementArray(GLuint VAO, t_array indices);
+void addArrayBuffer(GLuint VAO, t_array array, int dataSize, int arrayIndex);
 
 //  event.c
 

@@ -10,6 +10,7 @@ SRCFILES =	main.c \
 			utils.c \
 			event.c \
 			draw.c \
+			VAO.c \
 
 INCFILES = scop.h stb_image.h
 SRC = $(addprefix $(SRCDIR),$(SRCFILES))
@@ -28,7 +29,7 @@ $(OBJDIR)%.o: $(SRCDIR)%.c $(INC)
 	gcc  -c $< -o $@ $(FLAG)
 
 $(NAME):$(OBJS) $(INC)
-	gcc -o $@ $(OBJS) $(LINK)
+	gcc -o $@ $(OBJS) $(LINK) # -fsanitize=address
 clean:
 	rm -f $(OBJS)
 
