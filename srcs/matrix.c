@@ -14,7 +14,7 @@ void mat4Mult(t_mat4 mat1, t_mat4 mat2, t_mat4 *result) {
         for (int x = 0; x < 4; x++) {
             res = 0;
             for (int n = 0; n < 4; n++)
-                res += mat1[x][n] * mat2[n][y];         //(*result)[x][y] = mat1[x][0] * mat2[0][y] + mat1[x][1] * mat2[1][y] + mat1[x][2] * mat2[2][y] + mat1[x][3] * mat2[3][y];
+                res += mat1[x][n] * mat2[n][y];
             (*result)[x][y] = res;
         }
     }
