@@ -53,7 +53,17 @@ struct s_array {
 
 typedef struct s_array t_array;
 
+struct s_indice {
+    GLuint vertex;
+    GLuint uvs;
+    GLuint normale;
+};
+
+typedef struct s_indice t_indice;
+
 struct s_mesh {
+    char        *mltFile;
+    char        *textureFile;
     t_array     vertices;
     t_array     uvs;
     t_array     normales;

@@ -72,6 +72,8 @@ int main(int ac, char **av) {
     scop.object.VAO = initVertexArray(scop.object.mesh.vertices, scop.object.mesh.indices);
     free(scop.object.mesh.vertices.data);
     free(scop.object.mesh.indices.data);
+    free(scop.object.mesh.normales.data);
+    free(scop.object.mesh.uvs.data);
     perspective(45.0f, (float)(WINDOW_WIDTH/WINDOW_HEIGHT), 0.1f, 1000.0f, &scop.projection);
     mainLoop(&scop);
     glDeleteTextures(1, &scop.background.textureID);

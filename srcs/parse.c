@@ -25,7 +25,7 @@ void getMeshBorders(t_mesh *mesh) {
 }
 
 void getIndices(FILE *file, t_mesh *mesh) {
-    GLuint  indices[4];
+    t_indice  indices[4];
     char    buffer[4][30];
     char    line[256];
     int ret;
@@ -34,13 +34,13 @@ void getIndices(FILE *file, t_mesh *mesh) {
     if ((ret = sscanf(line, "%s %s %s %s\n", buffer[0], buffer[1], buffer[2], buffer[3])) < 3)
         return;
     for (int n = 0; n < ret; n++)
-        sscanf(buffer[n], "%d/", &indices[n]);
-    mesh->indices.data = realloc(mesh->indices.data, sizeof(GLuint) * (mesh->indices.size + 3 + (3 * (ret == 4))));
-    memcpy(&((GLuint*)mesh->indices.data)[mesh->indices.size], indices, sizeof(GLuint) * 3);
+        sscanf(buffer[n], "%d/%d/%d", &(indices[n].vertex), &(indices[n].uvs), &(indices[n].normale));
+    mesh->indices.data = realloc(mesh->indices.data, sizeof(t_indice) * (mesh->indices.size + 3 + (3 * (ret == 4))));
+    memcpy(&((t_indice*)mesh->indices.data)[mesh->indices.size], indices, sizeof(t_indice) * 3);
     mesh->indices.size += 3;
     if (ret == 4) {
-        memcpy(&((GLuint*)mesh->indices.data)[mesh->indices.size], indices, sizeof(GLuint) * 3);
-        ((GLuint*)mesh->indices.data)[mesh->indices.size + 1] = indices[3];
+        memcpy(&((t_indice*)mesh->indices.data)[mesh->indices.size], indices, sizeof(t_indice) * 3);
+        ((t_indice*)mesh->indices.data)[mesh->indices.size + 1] = indices[3];
         mesh->indices.size += 3;
     }
 }
@@ -70,7 +70,7 @@ void printObjectData(t_mesh *mesh) {
     printf("Vertices :\n\n");
     for (int n = 0; n < mesh->vertices.size; n++)
         printf("v = (%7.4f, %7.4f, %7.4f)\n", vertices[n].x, vertices[n].y, vertices[n].z);
-    printf("\nUvs :\n\n");
+ /*   printf("\nUvs :\n\n");
     for (int n = 0; n < mesh->uvs.size; n++)
         printf("uv = %7.4f, %7.4f\n", uvs[n].x, uvs[n].y);
     printf("\nNormales :\n\n");
@@ -78,9 +78,56 @@ void printObjectData(t_mesh *mesh) {
         printf("n = (%7.4f, %7.4f, %7.4f)\n", normales[n].x, normales[n].y, normales[n].z);
     printf("\nIndices :\n\n");
     for (int n = 0; n < (mesh->indices.size / 3); n++)
-        printf("indices = %6d, %6d, %6d\n", indices[n * 3], indices[n * 3 + 1], indices[n * 3 + 2]);
+        printf("indices = %6d, %6d, %6d\n", indices[n * 3], indices[n * 3 + 1], indices[n * 3 + 2]);*/
     printf("\nmin = (%7.4f, %7.4f, %7.4f)\n", mesh->min.x, mesh->min.y, mesh->min.z);
     printf("max = (%7.4f, %7.4f, %7.4f)\n", mesh->max.x, mesh->max.y, mesh->max.z);
+}
+
+int indexMeshData(t_mesh *mesh) {
+    t_vertex *newVertices;
+    t_vertex *newNormales;
+    t_vec2   *newUvs;
+    t_indice  *indices;
+
+    indices = mesh->indices.data;
+    if (!(newVertices = malloc(sizeof(t_vertex) * mesh->indices.size)) ||
+        !(newNormales = malloc(sizeof(t_vertex) * mesh->indices.size)) ||
+        !(newUvs = malloc(sizeof(t_vec2) * mesh->indices.size)))
+        return (0);
+    for (int n = 0; n < mesh->indices.size; n++) {
+        newVertices[n] = ((t_vertex*)mesh->vertices.data)[indices[n].vertex - 1];       // faire gaffe ca va crash si l'index est faux
+        newUvs[n] = ((t_vec2*)mesh->uvs.data)[indices[n].uvs - 1];
+        newNormales[n] = ((t_vertex*)mesh->normales.data)[indices[n].normale - 1];
+    }
+    free(mesh->vertices.data);
+    free(mesh->normales.data);
+    free(mesh->uvs.data);
+    mesh->vertices.data = newVertices;
+    mesh->normales.data = newNormales;
+    mesh->uvs.data = newUvs;
+    mesh->vertices.size = mesh->indices.size;
+    mesh->indices.size = 0;
+    free(mesh->indices.data);
+    mesh->indices.data = 0;
+    return (1);
+}
+
+int parseIndices(t_mesh *mesh) {
+    GLuint *newIndices;
+    t_indice  *indices;
+
+    if (!mesh->normales.size || !mesh->uvs.size) {
+        if (!(newIndices = malloc(sizeof(GLuint) * mesh->indices.size)))
+            return (0);
+        indices = mesh->indices.data;
+        for (int n = 0; n < mesh->indices.size; n++)
+        newIndices[n] = indices[n].vertex - 1;
+        free(mesh->indices.data);
+        mesh->indices.data = newIndices;
+        return (1);
+    }
+    indexMeshData(mesh);
+    return (1);
 }
 
 int getObjectData(t_mesh *mesh, char *fileName) {
@@ -97,9 +144,9 @@ int getObjectData(t_mesh *mesh, char *fileName) {
         if (ret == EOF) {
             fclose(file);
             getMeshBorders(mesh);
-            for (int n = 0; n < mesh->indices.size; n++)
-                ((GLuint*)mesh->indices.data)[n] -= 1;
-//            printObjectData(mesh);
+            if (!parseIndices(mesh))
+                return (0);
+            //printObjectData(mesh);
             return (1);
         }
         if (!strcmp(buffer, "v"))
