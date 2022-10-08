@@ -108,6 +108,8 @@ struct s_scop {
     t_object    background;
     t_object    object;
     t_mat4      projection;
+    t_vertex    lightPos;
+    t_vertex    lightColor;
 };
 
 typedef struct s_scop t_scop;
@@ -120,10 +122,11 @@ void rotate(t_mat4 matrix, float angle, t_vertex vector, t_mat4 *result);
 void mat4Scale(t_mat4 *result, t_vertex vector);
 void mat4Mult(t_mat4 mat1, t_mat4 mat2, t_mat4 *result);
 void printMat4(t_mat4 mat4);
+void normalise(t_vertex *vector);
 
 //  loop.c
 
-void setMatrix(t_scop *scop, GLuint matrixLoc, t_vertex *rotation);
+void setMatrix(t_scop *scop, GLuint matrixLoc, GLuint modelMatrixLoc, t_vertex *rotation);
 void mainLoop(t_scop *scop);
 
 //  parce.c
@@ -158,6 +161,6 @@ void getEvents(t_scop *scop);
 
 void initUniforms(t_object *object);
 void drawBackground(t_scop *scop);
-void drawObject(t_scop *scop, GLuint matrixLoc);
+void drawObject(t_scop *scop, GLuint matrixLoc, GLuint modelMatrixLoc);
 
 #endif

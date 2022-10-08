@@ -58,6 +58,44 @@ int parseArguments(int ac, char **av, t_scop  *scop) {
     return (1);
 }
 
+void parseNormals(t_scop  *scop) {
+    t_vertex normal;
+    t_vertex *normals;
+
+    normals = scop->object.mesh.normales.data;
+    for (int n = 0; n < scop->object.mesh.normales.size; n += 3) {
+        normal.x = normals[n].x + normals[n + 1].x + normals[n + 2].x;
+        normal.y = normals[n].y + normals[n + 1].y + normals[n + 2].y;
+        normal.z = normals[n].z + normals[n + 1].z + normals[n + 2].z;
+        normalise(&normal);
+        normals[n] = normal;
+        normals[n + 1] = normal;
+        normals[n + 2] = normal;
+    }
+}
+
+int generateVAO(t_scop  *scop) {
+
+    scop->object.VAO = initVertexArray(scop->object.mesh.vertices);
+    if (scop->object.mesh.indices.size) {
+        if (!(scop->object.programShader = initShaders("shaders/vertexShader", "shaders/fragmentShader", scop->path)))
+            return (0);
+        initElementArray(scop->object.VAO, scop->object.mesh.indices);
+    }
+    else {
+        if (!(scop->object.programShader = initShaders("shaders/completeVS", "shaders/completeFS", scop->path)))
+            return (0);
+        addArrayBuffer(scop->object.VAO, scop->object.mesh.uvs, sizeof(t_vec2), 1);
+        parseNormals(scop);
+        addArrayBuffer(scop->object.VAO, scop->object.mesh.normales, sizeof(t_vertex), 2);
+    }
+    free(scop->object.mesh.vertices.data);
+    free(scop->object.mesh.indices.data);
+    free(scop->object.mesh.normales.data);
+    free(scop->object.mesh.uvs.data); 
+    return (1);
+}
+
 int main(int ac, char **av) {
     t_scop  scop;
 
@@ -68,24 +106,12 @@ int main(int ac, char **av) {
         !(scop.object.textureID = textureInit(scop.option.texture, scop.path)))
         return (-1);
     free(scop.option.texture);
-    scop.object.VAO = initVertexArray(scop.object.mesh.vertices);
-    if (scop.object.mesh.indices.size) {
-        if (!(scop.object.programShader = initShaders("shaders/vertexShader", "shaders/fragmentShader", scop.path)))
-            return (-1);
-        initElementArray(scop.object.VAO, scop.object.mesh.indices);
-    }
-    else {
-        if (!(scop.object.programShader = initShaders("shaders/completeVS", "shaders/completeFS", scop.path)))
-            return (-1);
-        addArrayBuffer(scop.object.VAO, scop.object.mesh.uvs, sizeof(t_vec2), 1);
-        addArrayBuffer(scop.object.VAO, scop.object.mesh.normales, sizeof(t_vertex), 2);
-    }
-    free(scop.object.mesh.vertices.data);
-    free(scop.object.mesh.indices.data);
-    free(scop.object.mesh.normales.data);
-    free(scop.object.mesh.uvs.data); 
+    if (!generateVAO(&scop))
+        return (-1);
     perspective(45.0f, (float)(WINDOW_WIDTH/WINDOW_HEIGHT), 0.1f, 1000.0f, &scop.projection);
     ObjectSize = scop.object.mesh.max.y - scop.object.mesh.min.y;
+    scop.lightColor = (t_vertex){1.0f, 1.0f, 1.0f};
+    scop.lightPos = (t_vertex){scop.object.mesh.min.x * 1.5, ((scop.object.mesh.max.y - scop.object.mesh.min.y) / 2) * 1.5 - scop.object.mesh.min.y, (scop.object.mesh.max.z - scop.object.mesh.min.z) / 2 - scop.object.mesh.min.z};
     mainLoop(&scop);
     glDeleteTextures(1, &scop.background.textureID);
     glDeleteTextures(1, &scop.object.textureID);

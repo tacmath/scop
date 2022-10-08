@@ -1,12 +1,27 @@
-#version 400 core
+#version 330 core
 out vec4 FragColor;
 
 in vec3 normal;
 in vec2 texCoord;
+in vec3 currentPos;
+
+uniform vec3 lightPos;
+uniform vec3 lightColor;
+uniform vec3 cameraPos;
 
 uniform sampler2D tex0;
 
 void main()
 {
-    FragColor = texture(tex0, texCoord);
+    float ambiant = 0.1f;
+    vec3 lightDirection = normalize(lightPos - currentPos);
+    float diffuse = max(dot(normal, lightDirection), 0.0f);
+
+    float specularLight = 0.3f;
+    vec3 viewDirection = normalize(cameraPos - currentPos);
+    vec3 reflectionDirection = reflect(-lightDirection, normal);
+    float specAmmunt = pow(max(dot(reflectionDirection, reflectionDirection), 0.0f), 8);
+    float specular = specAmmunt * specularLight;
+
+    FragColor = texture(tex0, texCoord) * vec4(lightColor, 1.0f) * (diffuse + ambiant + specular);
 }

@@ -1,19 +1,16 @@
 #include "scop.h"
 
 void initUniforms(t_object *object) {
-    GLuint ObjectSizeLoc = glGetUniformLocation(object->programShader, "Osize");
-    GLuint ObjectMinLoc = glGetUniformLocation(object->programShader, "Omin");
-    GLuint tex0Uni = glGetUniformLocation(object->programShader, "tex0");
     t_vertex objectSize =   {object->mesh.max.x - object->mesh.min.x,
                             object->mesh.max.y - object->mesh.min.y,
                             object->mesh.max.z - object->mesh.min.z};
 
     glUseProgram(object->programShader);
 
-    glUniform3fv(ObjectSizeLoc, 1, (void*)(&objectSize));
-    glUniform3fv(ObjectMinLoc, 1, (void*)(&object->mesh.min));
+    glUniform3fv(glGetUniformLocation(object->programShader, "Osize"), 1, (void*)(&objectSize));
+    glUniform3fv(glGetUniformLocation(object->programShader, "Omin"), 1, (void*)(&object->mesh.min));
     glBindTexture(GL_TEXTURE_2D, object->textureID);
-    glUniform1i(tex0Uni, 0);
+    glUniform1i(glGetUniformLocation(object->programShader, "tex0"), 0);
 }
 
 void drawBackground(t_scop *scop) {
@@ -25,9 +22,9 @@ void drawBackground(t_scop *scop) {
         glEnable(GL_DEPTH_TEST);
 }
 
-void drawObject(t_scop *scop, GLuint matrixLoc) {
+void drawObject(t_scop *scop, GLuint matrixLoc, GLuint modelMatrixLoc) {
     glUseProgram(scop->object.programShader);
-    setMatrix(scop, matrixLoc, &scop->object.rotation);
+    setMatrix(scop, matrixLoc, modelMatrixLoc, &scop->object.rotation);
     glBindVertexArray(scop->object.VAO);
     glBindTexture(GL_TEXTURE_2D, scop->object.textureID);
     if (scop->object.mesh.indices.size)
