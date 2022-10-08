@@ -24,7 +24,7 @@ void drawBackground(t_scop *scop) {
 
 void drawObject(t_scop *scop, GLuint matrixLoc, GLuint modelMatrixLoc) {
     glUseProgram(scop->object.programShader);
-    setMatrix(scop, matrixLoc, modelMatrixLoc, &scop->object.rotation);
+    setMatrix(scop, matrixLoc, modelMatrixLoc);
     glBindVertexArray(scop->object.VAO);
     glBindTexture(GL_TEXTURE_2D, scop->object.textureID);
     if (scop->object.mesh.indices.size)

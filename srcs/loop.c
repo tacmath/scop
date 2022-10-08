@@ -2,23 +2,19 @@
 
 extern float cameraPosZ;
 
-void setMatrix(t_scop *scop, GLuint matrixLoc, GLuint modelMatrixLoc, t_vertex *rotation) {
+void setMatrix(t_scop *scop, GLuint matrixLoc, GLuint modelMatrixLoc) {
     t_mat4 matrix = IDENTITY_MAT4;
-    t_mat4 test = IDENTITY_MAT4;
     t_mat4 model = IDENTITY_MAT4;
     t_mat4 view = IDENTITY_MAT4;
-    float  rotationY = scop->object.rotation.y * (PI / 180.0f);
-   
-    rotate(matrix, rotation->y, (t_vertex){0.0f, 1.0f, 0.0f}, &model);
-    rotate(model, rotation->x, (t_vertex){cos(rotationY), 0.0f, sin(rotationY)}, &test);
-    glUniformMatrix4fv(glGetUniformLocation(scop->object.programShader, "rotation"), 1, GL_TRUE, (GLfloat*)test);
+
     mat4Traslate(&matrix, (t_vertex){
                 /*- ((scop->object.mesh.max.x - scop->object.mesh.min.x) / 2) - scop->object.mesh.min.x*/0.0f,
                 - ((scop->object.mesh.max.y - scop->object.mesh.min.y) / 2) - scop->object.mesh.min.y,
                 - ((scop->object.mesh.max.z - scop->object.mesh.min.z) / 2) - scop->object.mesh.min.z});
-    mat4Mult(test, matrix, &model);
+    mat4Mult(scop->rotation, matrix, &model);
 
     mat4Traslate(&view, (t_vertex){0.0f, 0.0f, cameraPosZ - (scop->object.mesh.max.y - scop->object.mesh.min.y) * 2});
+  //  mat4Mult(view, scop->rotation, &model);  //pour bougée la caméra a la place de l'object
     mat4Mult(scop->projection, view, &matrix);
 
     glUniformMatrix4fv(matrixLoc, 1, GL_TRUE, (GLfloat*)matrix);
@@ -29,6 +25,7 @@ void mainLoop(t_scop *scop) {
     GLuint matrixLoc =  glGetUniformLocation(scop->object.programShader, "matrix");
     GLuint cameraPosLoc =  glGetUniformLocation(scop->object.programShader, "cameraPos");
     GLuint modelMatrixLoc =  glGetUniformLocation(scop->object.programShader, "model");
+    GLuint rotatioinMatrixLoc =  glGetUniformLocation(scop->object.programShader, "rotation");
     GLuint transitionLoc = glGetUniformLocation(scop->object.programShader, "transition");
     double oldTime = glfwGetTime();
     double newTime;
@@ -47,7 +44,7 @@ void mainLoop(t_scop *scop) {
 		glfwSwapBuffers(scop->window);
         getEvents(scop);
         glUniform1f(transitionLoc, scop->transition);
-
+        glUniformMatrix4fv(rotatioinMatrixLoc, 1, GL_TRUE, (GLfloat*)(scop->rotation));
         t_vertex carmeraPos = (t_vertex){0.0f, 0.0f, cameraPosZ - (scop->object.mesh.max.y - scop->object.mesh.min.y) * 2};
         glUniform3fv(cameraPosLoc, 1, (void*)(&carmeraPos));
 

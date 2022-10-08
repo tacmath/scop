@@ -26,6 +26,11 @@ void mat4Traslate(t_mat4 *matrice, t_vertex vector) {
     (*matrice)[2][3] = vector.z;
 }
 
+void mat4SetIdentity(t_mat4 *matrix) {
+    t_mat4 tmp = IDENTITY_MAT4;
+    memcpy(matrix, tmp, sizeof(t_mat4));
+}
+
 void mat4Scale(t_mat4 *result, t_vertex vector) {
     t_mat4 matrice = IDENTITY_MAT4;
     matrice[0][0] = vector.x;
