@@ -5,6 +5,8 @@ void getEvents(t_scop *scop) {
     double posx, posy;
     static char transition = -1;
     static char keyStatusT = 1;
+    static char keyStatusN = 1;
+    static char normalMap = 1;
     
     glfwPollEvents();
     state = glfwGetMouseButton(scop->window, GLFW_MOUSE_BUTTON_LEFT);
@@ -22,6 +24,14 @@ void getEvents(t_scop *scop) {
         rotate(matrix, scop->object.rotation.y, (t_vertex){0.0f, 1.0f, 0.0f}, &tmp);
         rotate(tmp, scop->object.rotation.x, (t_vertex){cos(rotationY), 0.0f, sin(rotationY)}, &scop->rotation);
     }
+    if (glfwGetKey(scop->window, GLFW_KEY_N) == GLFW_PRESS && keyStatusN) {
+        normalMap = !normalMap;
+        glUniform1i(glGetUniformLocation(scop->object.programShader, "activateNormalMap"), normalMap);
+        keyStatusN = 0;
+    }
+    else if (glfwGetKey(scop->window, GLFW_KEY_N) == GLFW_RELEASE)
+        keyStatusN = 1;
+
     if (glfwGetKey(scop->window, GLFW_KEY_T) == GLFW_PRESS && keyStatusT) {
         transition = -transition;
         keyStatusT = 0;

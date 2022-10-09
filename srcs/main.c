@@ -58,6 +58,60 @@ int parseArguments(int ac, char **av, t_scop  *scop) {
     return (1);
 }
 
+void getTanAndBiTan(t_scop  *scop) {
+    t_vertex    vec3;
+    t_vertex    *tangent;
+    t_vertex    *bitangent;
+    t_vertex    *pos;
+    t_vec2      *uv;
+    t_vertex    edge1;
+    t_vertex    edge2;
+    t_vec2      deltaUV1;
+    t_vec2      deltaUV2;
+    GLfloat     f;
+
+    pos = scop->object.mesh.vertices.data;
+    uv = scop->object.mesh.uvs.data;
+    if (!(tangent = malloc(sizeof(t_vertex) * scop->object.mesh.vertices.size)) ||
+        !(bitangent = malloc(sizeof(t_vertex) * scop->object.mesh.vertices.size)))
+    return ;
+    for (int n = 0; n < scop->object.mesh.vertices.size; n += 3) {
+        edge1.x = pos[n + 1].x - pos[n].x;
+        edge1.y = pos[n + 1].y - pos[n].y;
+        edge1.z = pos[n + 1].z - pos[n].z;
+        edge2.x = pos[n + 2].x - pos[n].x;
+        edge2.y = pos[n + 2].y - pos[n].y;
+        edge2.z = pos[n + 2].z - pos[n].z;
+        deltaUV1.x = uv[n + 1].x - uv[n].x;
+        deltaUV1.y = uv[n + 1].y - uv[n].y;
+        deltaUV2.x = uv[n + 2].x - uv[n].x;
+        deltaUV2.y = uv[n + 2].y - uv[n].y;
+
+        f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+
+        vec3.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
+        vec3.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
+        vec3.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
+        normalise(&vec3);
+        tangent[n] = vec3;
+        tangent[n + 1] = vec3;
+        tangent[n + 2] = vec3;
+
+        vec3.x = f * (-deltaUV2.x * edge1.x + deltaUV1.x * edge2.x);
+        vec3.y = f * (-deltaUV2.x * edge1.y + deltaUV1.x * edge2.y);
+        vec3.z = f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z);
+        normalise(&vec3);
+        bitangent[n] = vec3;
+        bitangent[n + 1] = vec3;
+        bitangent[n + 2] = vec3;
+        
+    }
+    addArrayBuffer(scop->object.VAO, (t_array){tangent, scop->object.mesh.vertices.size}, sizeof(t_vertex), 3);
+    addArrayBuffer(scop->object.VAO, (t_array){bitangent, scop->object.mesh.vertices.size}, sizeof(t_vertex), 4);
+    free(tangent);
+    free(bitangent);
+}
+
 void parseNormals(t_scop  *scop) {
     t_vertex normal;
     t_vertex *normals;
@@ -72,6 +126,8 @@ void parseNormals(t_scop  *scop) {
         normals[n + 1] = normal;
         normals[n + 2] = normal;
     }
+    addArrayBuffer(scop->object.VAO, scop->object.mesh.normales, sizeof(t_vertex), 2);
+    getTanAndBiTan(scop);
 }
 
 int generateVAO(t_scop  *scop) {
@@ -86,8 +142,7 @@ int generateVAO(t_scop  *scop) {
         if (!(scop->object.programShader = initShaders("shaders/completeVS", "shaders/completeFS", scop->path)))
             return (0);
         addArrayBuffer(scop->object.VAO, scop->object.mesh.uvs, sizeof(t_vec2), 1);
-        parseNormals(scop);
-        addArrayBuffer(scop->object.VAO, scop->object.mesh.normales, sizeof(t_vertex), 2);
+        parseNormals(scop);  
     }
     free(scop->object.mesh.vertices.data);
     free(scop->object.mesh.indices.data);
@@ -111,7 +166,6 @@ int main(int ac, char **av) {
     perspective(45.0f, (float)(WINDOW_WIDTH/WINDOW_HEIGHT), 0.1f, 1000.0f, &scop.projection);
     mat4SetIdentity(&scop.rotation);
     ObjectSize = scop.object.mesh.max.y - scop.object.mesh.min.y;
-    scop.lightColor = (t_vertex){1.0f, 1.0f, 1.0f};
     scop.lightPos = (t_vertex){scop.object.mesh.min.x * 1.5, ((scop.object.mesh.max.y - scop.object.mesh.min.y) / 2) * 1.5 - scop.object.mesh.min.y, (scop.object.mesh.max.z - scop.object.mesh.min.z) / 2 - scop.object.mesh.min.z};
     mainLoop(&scop);
     glDeleteTextures(1, &scop.background.textureID);

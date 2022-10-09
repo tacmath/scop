@@ -110,7 +110,6 @@ struct s_scop {
     t_mat4      projection;
     t_mat4      rotation;
     t_vertex    lightPos;
-    t_vertex    lightColor;
 };
 
 typedef struct s_scop t_scop;

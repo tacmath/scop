@@ -1,27 +1,37 @@
 #version 330 core
 out vec4 FragColor;
 
-in vec3 normal;
+in vec3 Normal;
 in vec2 texCoord;
 in vec3 currentPos;
+in mat3 TBN;
 
 uniform vec3 lightPos;
-uniform vec3 lightColor;
 uniform vec3 cameraPos;
+uniform bool activateNormalMap;
 
 uniform sampler2D tex0;
 
 void main()
 {
+    vec3 normal = Normal;
+    if (activateNormalMap) {
+        normal = texture(tex0, texCoord).rgb;
+        normal = normal * 2 - 1;
+        normal = normalize(TBN * normal);
+    }
+    
+    vec3 Color = vec3(1.0f, 1.0f, 1.0f);//texture(tex0, texCoord).rgb;
+
     float ambiant = 0.1f;
     vec3 lightDirection = normalize(lightPos - currentPos);
     float diffuse = max(dot(normal, lightDirection), 0.0f);
 
-    float specularLight = 0.3f;
+    float specularLight = 0.2f;
     vec3 viewDirection = normalize(cameraPos - currentPos);
     vec3 reflectionDirection = reflect(-lightDirection, normal);
     float specAmmunt = pow(max(dot(reflectionDirection, reflectionDirection), 0.0f), 8);
     float specular = specAmmunt * specularLight;
 
-    FragColor = texture(tex0, texCoord) * vec4(lightColor, 1.0f) * (diffuse + ambiant + specular);
+    FragColor = vec4(Color * (diffuse + ambiant + specular), 1.0f);
 }
