@@ -61,13 +61,23 @@ struct s_indice {
 
 typedef struct s_indice t_indice;
 
+struct s_usemtl {
+    char *name;
+    size_t start;
+    size_t size;
+    char *texture;
+};
+
+typedef struct s_usemtl t_usemtl;
+
 struct s_mesh {
     char        *mltFile;
-    char        *textureFile;
     t_array     vertices;
     t_array     uvs;
     t_array     normales;
     t_array     indices;
+    t_usemtl    *segments;
+    size_t      segmentNb;
     t_vertex    min;
     t_vertex    max;
 };
@@ -83,15 +93,31 @@ struct s_texture {
 
 typedef struct s_texture t_texture;
 
-struct s_object {
+struct s_segment {
     GLuint      VAO;
+    GLuint      textureID;
+    GLuint      normalTextureID;
+};
+
+typedef struct s_segment t_segment;
+
+struct s_object {
+    t_segment   *segments;
+    GLuint      segmentNb;
     t_mesh      mesh;
     t_vertex    rotation;
-    GLuint      textureID;
     GLuint      programShader;
 };
 
 typedef struct s_object t_object;
+
+struct s_background {
+    GLuint  VAO;
+    GLuint  textureID;
+    GLuint  programShader;
+};
+
+typedef struct s_background t_background;
 
 struct s_option {
     char        *texture;
@@ -105,7 +131,7 @@ struct s_scop {
     t_option    option;
     GLfloat     transition;
     t_position  mouse;
-    t_object    background;
+    t_background background;
     t_object    object;
     t_mat4      projection;
     t_mat4      rotation;
@@ -127,12 +153,18 @@ void mat4SetIdentity(t_mat4 *matrix);
 
 //  loop.c
 
-void setMatrix(t_scop *scop, GLuint matrixLoc, GLuint modelMatrixLoc);
+void setModelMatrix(t_scop *scop, GLuint matrixLoc);
+void setVPMatrix(t_scop *scop, GLuint matrixLoc);
 void mainLoop(t_scop *scop);
 
-//  parce.c
+//  parce_file.c
 
 int getObjectData(t_mesh *mesh, char *fileName);
+
+//  parce_data.c
+
+int parseArguments(int ac, char **av, t_scop  *scop);
+void parseNormals(t_scop  *scop);
 
 //  utils.c
 
@@ -160,8 +192,7 @@ void getEvents(t_scop *scop);
 
 //  draw.c
 
-void initUniforms(t_object *object);
 void drawBackground(t_scop *scop);
-void drawObject(t_scop *scop, GLuint matrixLoc, GLuint modelMatrixLoc);
+void drawObject(t_scop *scop, GLuint modelMatrixLoc);
 
 #endif

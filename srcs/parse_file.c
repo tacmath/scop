@@ -30,6 +30,11 @@ void getIndices(FILE *file, t_mesh *mesh) {
     char    line[256];
     int ret;
 
+    if (!mesh->indices.size && !mesh->segmentNb) {
+        mesh->segmentNb = 1;
+        mesh->segments = calloc(1, sizeof(t_usemtl));
+        mesh->segments->start = 0;
+    }
     fscanf(file, "%[^\n]", line);
     if ((ret = sscanf(line, "%s %s %s %s\n", buffer[0], buffer[1], buffer[2], buffer[3])) < 3)
         return;
@@ -60,7 +65,7 @@ void getUvs(FILE *file, t_mesh *mesh) {
     fscanf(file, "%f %f\n", &uv.x, &uv.y);
     ((t_vec2*)mesh->uvs.data)[mesh->uvs.size++] = uv;
 }
-
+/*
 void printObjectData(t_mesh *mesh) {
     GLuint *indices = mesh->indices.data;
     t_vertex *vertices = mesh->vertices.data;
@@ -70,7 +75,7 @@ void printObjectData(t_mesh *mesh) {
     printf("Vertices :\n\n");
     for (int n = 0; n < mesh->vertices.size; n++)
         printf("v = (%7.4f, %7.4f, %7.4f)\n", vertices[n].x, vertices[n].y, vertices[n].z);
- /*   printf("\nUvs :\n\n");
+    printf("\nUvs :\n\n");
     for (int n = 0; n < mesh->uvs.size; n++)
         printf("uv = %7.4f, %7.4f\n", uvs[n].x, uvs[n].y);
     printf("\nNormales :\n\n");
@@ -78,9 +83,18 @@ void printObjectData(t_mesh *mesh) {
         printf("n = (%7.4f, %7.4f, %7.4f)\n", normales[n].x, normales[n].y, normales[n].z);
     printf("\nIndices :\n\n");
     for (int n = 0; n < (mesh->indices.size / 3); n++)
-        printf("indices = %6d, %6d, %6d\n", indices[n * 3], indices[n * 3 + 1], indices[n * 3 + 2]);*/
+        printf("indices = %6d, %6d, %6d\n", indices[n * 3], indices[n * 3 + 1], indices[n * 3 + 2]);
     printf("\nmin = (%7.4f, %7.4f, %7.4f)\n", mesh->min.x, mesh->min.y, mesh->min.z);
     printf("max = (%7.4f, %7.4f, %7.4f)\n", mesh->max.x, mesh->max.y, mesh->max.z);
+}*/
+
+void printSegments(t_mesh *mesh) {
+    for (int n = 0; n < mesh->segmentNb; n++) {
+        dprintf(1, "\nname = %s\n", mesh->segments[n].name);
+        dprintf(1, "texture = %s\n", mesh->segments[n].texture);
+        dprintf(1, "start = %d\n", mesh->segments[n].start);
+        dprintf(1, "size = %d\n", mesh->segments[n].size);
+    }
 }
 
 int indexMeshData(t_mesh *mesh) {
@@ -123,7 +137,7 @@ int parseIndices(t_mesh *mesh) {
             return (0);
         indices = mesh->indices.data;
         for (int n = 0; n < mesh->indices.size; n++)
-        newIndices[n] = indices[n].vertex - 1;
+            newIndices[n] = indices[n].vertex - 1;
         free(mesh->indices.data);
         mesh->indices.data = newIndices;
         return (1);
@@ -136,6 +150,7 @@ void parseMtllib(t_mesh *mesh, char *path) {
     FILE *file;
     char *fileName;
     char buffer[256];
+    int segmentIndex;
 
     if (!mesh->mltFile)
         return ;
@@ -149,14 +164,44 @@ void parseMtllib(t_mesh *mesh, char *path) {
     if (!(file = fopen(fileName, "r")))
         return ;
     free(fileName);
+    segmentIndex = -1;
     while (fscanf(file, "%s", buffer) != EOF) {
-        if (!strcmp(buffer, "map_Kd")) {
+        if (!strcmp(buffer, "newmtl")) {
+            segmentIndex = -1;
             fscanf(file, "%s\n", buffer);
-            mesh->textureFile = ft_strjoin(path, buffer);
-            break ;
+            for (int n = 0; n < mesh->segmentNb; n++) {
+                if (mesh->segments[n].name && !strcmp(buffer, mesh->segments[n].name)) {
+                    segmentIndex = n;
+                    break ;
+                }
+            }
+        }
+        else if (!strcmp(buffer, "map_Kd")) {
+            fscanf(file, "%s\n", buffer);
+            if (segmentIndex != -1)
+                mesh->segments[segmentIndex].texture = ft_strjoin(path, buffer);
         }
     }
     fclose(file);
+}
+
+void addSegment(FILE *file, t_mesh *mesh) {
+    char buffer[256];
+    char name[256];
+
+    fscanf(file, "%[^\n]", buffer);
+    if (sscanf(buffer, "%s", name) < 1)
+        return ;
+    mesh->segments = realloc(mesh->segments, sizeof(t_usemtl) * (mesh->segmentNb + 1));
+    mesh->segments[mesh->segmentNb].name = strdup(name);
+    mesh->segments[mesh->segmentNb].start = mesh->indices.size;
+    mesh->segments[mesh->segmentNb].texture = 0;
+    mesh->segmentNb++;
+}
+void parseSegments(t_mesh *mesh) {
+    for (int n = 0; n < mesh->segmentNb - 1; n++)
+        mesh->segments[n].size = mesh->segments[n + 1].start - mesh->segments[n].start;
+    mesh->segments[mesh->segmentNb - 1].size = mesh->indices.size - mesh->segments[mesh->segmentNb - 1].start;
 }
 
 int getObjectData(t_mesh *mesh, char *fileName) {
@@ -179,14 +224,18 @@ int getObjectData(t_mesh *mesh, char *fileName) {
             fscanf(file, "%s\n", buffer);
             mesh->mltFile = strdup(buffer);
         }
+        else if (!strcmp(buffer, "usemtl"))
+            addSegment(file, mesh);
         else
             fscanf(file, "\n");
     }
     fclose(file);
     getMeshBorders(mesh);
+    parseSegments(mesh);
+    parseMtllib(mesh, fileName);
     if (!parseIndices(mesh))
         return (0);
-    parseMtllib(mesh, fileName);
+    //printSegments(mesh);
     //printObjectData(mesh);
     return (1);
 }

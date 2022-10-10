@@ -6,7 +6,8 @@ SRCFILES =	main.c \
 			matrix.c \
 			loop.c \
 			init.c \
-			parse.c \
+			parse_file.c \
+			parse_data.c \
 			utils.c \
 			event.c \
 			draw.c \
@@ -29,7 +30,7 @@ $(OBJDIR)%.o: $(SRCDIR)%.c $(INC)
 	gcc  -c $< -o $@ $(FLAG)
 
 $(NAME):$(OBJS) $(INC)
-	gcc -o $@ $(OBJS) $(LINK) # -fsanitize=address
+	gcc -o $@ $(OBJS) $(LINK)
 clean:
 	rm -f $(OBJS)
 

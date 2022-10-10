@@ -36,118 +36,79 @@ int initBackground(t_scop *scop) {
     return (1);
 }
 
-int parseArguments(int ac, char **av, t_scop  *scop) {
-    char    *objectFile;
-    
-    scop->path = strrchr(av[0], '/');
-    scop->path[1] = 0;
-    scop->path = av[0];
-    if (!(objectFile = getObjectFile(ac, av)) ||
-        !getObjectData(&scop->object.mesh, objectFile)) {
-        printUsage();
-        return (0);
+void freeMeshData(t_mesh *mesh) {
+    free(mesh->vertices.data);
+    free(mesh->indices.data);
+    free(mesh->normales.data);
+    free(mesh->uvs.data);
+    for (int n = 0; n < mesh->segmentNb; n++) {
+        free(mesh->segments[n].name);
+        free(mesh->segments[n].texture);
     }
-    if (!(scop->option.texture = getOption("-t", ac, av, objectFile))) {
-        if (scop->object.mesh.textureFile)                                      // a changer option.texture fait pas trop de sens
-            scop->option.texture = scop->object.mesh.textureFile;
-        else
-            scop->option.texture = strdup(DEFAULT_TEXTURE);
-    }
-    else
-        scop->option.texture = strdup(scop->option.texture);
-    return (1);
-}
-
-void getTanAndBiTan(t_scop  *scop) {
-    t_vertex    vec3;
-    t_vertex    *tangent;
-    t_vertex    *bitangent;
-    t_vertex    *pos;
-    t_vec2      *uv;
-    t_vertex    edge1;
-    t_vertex    edge2;
-    t_vec2      deltaUV1;
-    t_vec2      deltaUV2;
-    GLfloat     f;
-
-    pos = scop->object.mesh.vertices.data;
-    uv = scop->object.mesh.uvs.data;
-    if (!(tangent = malloc(sizeof(t_vertex) * scop->object.mesh.vertices.size)) ||
-        !(bitangent = malloc(sizeof(t_vertex) * scop->object.mesh.vertices.size)))
-    return ;
-    for (int n = 0; n < scop->object.mesh.vertices.size; n += 3) {
-        edge1.x = pos[n + 1].x - pos[n].x;
-        edge1.y = pos[n + 1].y - pos[n].y;
-        edge1.z = pos[n + 1].z - pos[n].z;
-        edge2.x = pos[n + 2].x - pos[n].x;
-        edge2.y = pos[n + 2].y - pos[n].y;
-        edge2.z = pos[n + 2].z - pos[n].z;
-        deltaUV1.x = uv[n + 1].x - uv[n].x;
-        deltaUV1.y = uv[n + 1].y - uv[n].y;
-        deltaUV2.x = uv[n + 2].x - uv[n].x;
-        deltaUV2.y = uv[n + 2].y - uv[n].y;
-
-        f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
-
-        vec3.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
-        vec3.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
-        vec3.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
-        normalise(&vec3);
-        tangent[n] = vec3;
-        tangent[n + 1] = vec3;
-        tangent[n + 2] = vec3;
-
-        vec3.x = f * (-deltaUV2.x * edge1.x + deltaUV1.x * edge2.x);
-        vec3.y = f * (-deltaUV2.x * edge1.y + deltaUV1.x * edge2.y);
-        vec3.z = f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z);
-        normalise(&vec3);
-        bitangent[n] = vec3;
-        bitangent[n + 1] = vec3;
-        bitangent[n + 2] = vec3;
-        
-    }
-    addArrayBuffer(scop->object.VAO, (t_array){tangent, scop->object.mesh.vertices.size}, sizeof(t_vertex), 3);
-    addArrayBuffer(scop->object.VAO, (t_array){bitangent, scop->object.mesh.vertices.size}, sizeof(t_vertex), 4);
-    free(tangent);
-    free(bitangent);
-}
-
-void parseNormals(t_scop  *scop) {
-    t_vertex normal;
-    t_vertex *normals;
-
-    normals = scop->object.mesh.normales.data;
-    for (int n = 0; n < scop->object.mesh.normales.size; n += 3) {
-        normal.x = normals[n].x + normals[n + 1].x + normals[n + 2].x;
-        normal.y = normals[n].y + normals[n + 1].y + normals[n + 2].y;
-        normal.z = normals[n].z + normals[n + 1].z + normals[n + 2].z;
-        normalise(&normal);
-        normals[n] = normal;
-        normals[n + 1] = normal;
-        normals[n + 2] = normal;
-    }
-    addArrayBuffer(scop->object.VAO, scop->object.mesh.normales, sizeof(t_vertex), 2);
-    getTanAndBiTan(scop);
+    free(mesh->segments);
 }
 
 int generateVAO(t_scop  *scop) {
+    t_array segment;
 
-    scop->object.VAO = initVertexArray(scop->object.mesh.vertices);
+    scop->object.segmentNb = scop->object.mesh.segmentNb;
+    if (!(scop->object.segments = calloc(sizeof(t_segment), scop->object.segmentNb)))
+        return (0);
+    
     if (scop->object.mesh.indices.size) {
         if (!(scop->object.programShader = initShaders("shaders/vertexShader", "shaders/fragmentShader", scop->path)))
             return (0);
-        initElementArray(scop->object.VAO, scop->object.mesh.indices);
+        scop->object.segments[0].VAO = initVertexArray(scop->object.mesh.vertices);
+        initElementArray(scop->object.segments[0].VAO, scop->object.mesh.indices);
+        scop->object.segmentNb = 1;
+        return (1);
     }
-    else {
-        if (!(scop->object.programShader = initShaders("shaders/completeVS", "shaders/completeFS", scop->path)))
-            return (0);
-        addArrayBuffer(scop->object.VAO, scop->object.mesh.uvs, sizeof(t_vec2), 1);
-        parseNormals(scop);  
+    if (!(scop->object.programShader = initShaders("shaders/completeVS", "shaders/completeFS", scop->path)))
+        return (0);
+    for (int n = 0; n < scop->object.segmentNb; n++) {
+        segment.data = scop->object.mesh.vertices.data + scop->object.mesh.segments[n].start * sizeof(t_vertex);
+        segment.size = scop->object.mesh.segments[n].size;
+        scop->object.segments[n].VAO = initVertexArray(segment);
+        segment.data = scop->object.mesh.uvs.data + scop->object.mesh.segments[n].start * sizeof(t_vec2);
+        addArrayBuffer(scop->object.segments[n].VAO, segment, sizeof(t_vec2), 1);
     }
-    free(scop->object.mesh.vertices.data);
-    free(scop->object.mesh.indices.data);
-    free(scop->object.mesh.normales.data);
-    free(scop->object.mesh.uvs.data); 
+    parseNormals(scop);
+    return (1);
+}
+
+char *ft_replaceStr(char *str, char *ref, char *replace) {
+    char *new;
+    char *tmp;
+    int n;
+
+    if (!(tmp = strstr(str, ref)) ||
+        !(new = malloc(strlen(str) - strlen(ref) + strlen(replace) + 1)))
+        return (0);
+    n = tmp - str;
+    memcpy(new, str, n);
+    strcpy(new + n, replace);
+    strcpy(new + n + strlen(replace), tmp + strlen(ref));
+    return (new);
+}
+
+int loadAllTextures(t_scop *scop) {
+    char *normalFileName;
+
+    for (int n = 0; n < scop->object.segmentNb; n++) {
+        if (!scop->object.mesh.segments[n].texture ||
+            !(scop->object.segments[n].textureID = textureInit(scop->object.mesh.segments[n].texture, scop->path))) {
+            if (!(scop->object.segments[n].textureID = textureInit(scop->option.texture, scop->path)))
+                return (0);
+        }
+        else {
+            normalFileName = ft_replaceStr(scop->object.mesh.segments[n].texture, "Base_color", "Normal_OpenGL");
+            if (!normalFileName) {
+                continue;
+            }
+            scop->object.segments[n].normalTextureID = textureInit(normalFileName, scop->path);
+            free(normalFileName);
+        }
+    }
     return (1);
 }
 
@@ -158,17 +119,18 @@ int main(int ac, char **av) {
     if (!parseArguments(ac, av, &scop) ||
         !initWindow(&scop) ||
         !initBackground(&scop) ||
-        !(scop.object.textureID = textureInit(scop.option.texture, scop.path)))
+        !generateVAO(&scop)||
+        !loadAllTextures(&scop))
         return (-1);
-    free(scop.option.texture);
-    if (!generateVAO(&scop))
-        return (-1);
+    freeMeshData(&scop.object.mesh);
     perspective(45.0f, (float)(WINDOW_WIDTH/WINDOW_HEIGHT), 0.1f, 1000.0f, &scop.projection);
     mat4SetIdentity(&scop.rotation);
     ObjectSize = scop.object.mesh.max.y - scop.object.mesh.min.y;
     scop.lightPos = (t_vertex){scop.object.mesh.min.x * 1.5, ((scop.object.mesh.max.y - scop.object.mesh.min.y) / 2) * 1.5 - scop.object.mesh.min.y, (scop.object.mesh.max.z - scop.object.mesh.min.z) / 2 - scop.object.mesh.min.z};
     mainLoop(&scop);
     glDeleteTextures(1, &scop.background.textureID);
-    glDeleteTextures(1, &scop.object.textureID);
+    for (int n = 0; n < scop.object.segmentNb; n++)
+        glDeleteTextures(1, &scop.object.segments[n].textureID);
+    free(scop.object.segments);
     return (0);
 }
