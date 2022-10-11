@@ -149,6 +149,8 @@ void mat4Scale(t_mat4 *result, t_vertex vector);
 void mat4Mult(t_mat4 mat1, t_mat4 mat2, t_mat4 *result);
 void printMat4(t_mat4 mat4);
 void mat4SetIdentity(t_mat4 *matrix);
+t_vertex mat4Vec3Mult(t_mat4 mat, t_vertex vec);
+void mat4Transpose(t_mat4 *matrix);
 
 //  vector.c
 

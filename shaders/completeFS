@@ -25,14 +25,14 @@ void main()
     
     vec3 Color = texture(Texture, texCoord).rgb;
 
-    float ambiant = 0.1f;
+    float ambiant = 0.2f;
     vec3 lightDirection = normalize(lightPos - currentPos);
     float diffuse = max(dot(normal, lightDirection), 0.0f);
 
-    float specularLight = 0.2f;
+    float specularLight = 0.5f;
     vec3 viewDirection = normalize(cameraPos - currentPos);
     vec3 reflectionDirection = reflect(-lightDirection, normal);
-    float specAmmunt = pow(max(dot(reflectionDirection, reflectionDirection), 0.0f), 8);
+    float specAmmunt = pow(max(dot(viewDirection, reflectionDirection), 0.0f), 8);
     float specular = specAmmunt * specularLight;
 
     FragColor = vec4(Color * (diffuse + ambiant + specular), 1.0f);

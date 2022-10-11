@@ -20,7 +20,7 @@ void main()
 
    gl_Position = matrix * model * vec4(aPos, 1.0f); //  proj * view * model *
 
-   mat3 modelVector = transpose(inverse(mat3(model)));
+   mat3 modelVector = transpose(inverse(mat3(model))); // not needed if model doesn't rotate
 
    vec3 tangent = normalize(modelVector * aTangent);
    vec3 bitangent = normalize(modelVector * aBitangent);

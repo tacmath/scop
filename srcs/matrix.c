@@ -26,6 +26,27 @@ void mat4Traslate(t_mat4 *matrice, t_vertex vector) {
     (*matrice)[2][3] = vector.z;
 }
 
+t_vertex mat4Vec3Mult(t_mat4 mat, t_vertex vec) {
+    t_vertex res;
+
+    res.x= mat[0][0] * vec.x + mat[0][1] * vec.y + mat[0][2] * vec.z;
+    res.y= mat[1][0] * vec.x + mat[1][1] * vec.y + mat[1][2] * vec.z;
+    res.z= mat[2][0] * vec.x + mat[2][1] * vec.y + mat[2][2] * vec.z;
+    return (res);
+}
+
+void mat4Transpose(t_mat4 *matrix) {
+    float tmp;
+
+    for (int m = 0; m < 3; m++)
+        for (int n = 1 + m; n < 4; n++)
+        {
+            tmp = (*matrix)[n][m];
+            (*matrix)[n][m] = (*matrix)[m][n];
+            (*matrix)[m][n] = tmp;
+        }
+}
+
 void mat4SetIdentity(t_mat4 *matrix) {
     t_mat4 tmp = IDENTITY_MAT4;
     memcpy(matrix, tmp, sizeof(t_mat4));

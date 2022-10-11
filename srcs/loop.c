@@ -22,14 +22,12 @@ void initUniforms(t_scop *scop) {
 
 void setModelMatrix(t_scop *scop, GLuint matrixLoc) {
     t_mat4 matrix = IDENTITY_MAT4;
-    t_mat4 model = IDENTITY_MAT4;
 
     mat4Traslate(&matrix, (t_vertex){
                 /*- ((scop->object.mesh.max.x - scop->object.mesh.min.x) / 2) - scop->object.mesh.min.x*/0.0f,
                 - ((scop->object.mesh.max.y - scop->object.mesh.min.y) / 2) - scop->object.mesh.min.y,
                 - ((scop->object.mesh.max.z - scop->object.mesh.min.z) / 2) - scop->object.mesh.min.z});
-    mat4Mult(scop->rotation, matrix, &model);
-    glUniformMatrix4fv(matrixLoc, 1, GL_TRUE, (GLfloat*)model);
+    glUniformMatrix4fv(matrixLoc, 1, GL_TRUE, (GLfloat*)matrix);
 }
 
 void setVPMatrix(t_scop *scop, GLuint matrixLoc) {
@@ -37,8 +35,9 @@ void setVPMatrix(t_scop *scop, GLuint matrixLoc) {
     t_mat4 view = IDENTITY_MAT4;
 
     mat4Traslate(&view, (t_vertex){0.0f, 0.0f, cameraPosZ - (scop->object.mesh.max.y - scop->object.mesh.min.y) * 2});
-    mat4Mult(scop->projection, view, &matrix);
-    glUniformMatrix4fv(matrixLoc, 1, GL_TRUE, (GLfloat*)matrix); 
+    mat4Mult(view, scop->rotation, &matrix);
+    mat4Mult(scop->projection, matrix, &view);
+    glUniformMatrix4fv(matrixLoc, 1, GL_TRUE, (GLfloat*)view); 
 }
 
 void mainLoop(t_scop *scop) {
@@ -46,6 +45,7 @@ void mainLoop(t_scop *scop) {
     GLuint cameraPosLoc =  glGetUniformLocation(scop->object.programShader, "cameraPos");
     GLuint modelMatrixLoc =  glGetUniformLocation(scop->object.programShader, "model");
     GLuint transitionLoc = glGetUniformLocation(scop->object.programShader, "transition");
+    t_mat4 matrix;
    
     initUniforms(scop);
     while ( glfwGetKey(scop->window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
@@ -53,7 +53,12 @@ void mainLoop(t_scop *scop) {
         
         glUniform1f(transitionLoc, scop->transition);
         t_vertex carmeraPos = (t_vertex){0.0f, 0.0f, -(cameraPosZ - (scop->object.mesh.max.y - scop->object.mesh.min.y) * 2)};
+        memcpy(matrix, scop->rotation, sizeof(t_mat4));
+        mat4Transpose(&matrix);
+        carmeraPos = mat4Vec3Mult(matrix, carmeraPos);
+    //    printf("v = %f, %f, %f\n", carmeraPos.x, carmeraPos.y, carmeraPos.z);
         glUniform3fv(cameraPosLoc, 1, (void*)(&carmeraPos));
+    //    glUniform3fv(glGetUniformLocation(scop->object.programShader, "lightPos"), 1, (void*)(&carmeraPos));
         setVPMatrix(scop, matrixLoc);
 
         glClear(GL_DEPTH_BUFFER_BIT);
