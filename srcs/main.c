@@ -46,7 +46,7 @@ int loadAllTextures(t_scop *scop) {
 
     for (int n = 0; n < scop->object.segmentNb; n++) {
         if (!scop->object.mesh.segments[n].texture ||
-            !(scop->object.segments[n].textureID = textureInit(scop->object.mesh.segments[n].texture, scop->path))) {
+            !(scop->object.segments[n].textureID = textureInit(scop->object.mesh.segments[n].texture, ""))) {
             if (!(scop->object.segments[n].textureID = textureInit(scop->option.texture, scop->path)))
                 return (0);
         }
@@ -55,7 +55,7 @@ int loadAllTextures(t_scop *scop) {
             if (!normalFileName) {
                 continue;
             }
-            scop->object.segments[n].normalTextureID = textureInit(normalFileName, scop->path);
+            scop->object.segments[n].normalTextureID = textureInit(normalFileName, "");
             free(normalFileName);
         }
     }
