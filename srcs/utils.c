@@ -35,44 +35,33 @@ void printUsage() {
     printf("  -t  TEXTURE_FILE\n");
 }
 
-char *getOption(char *option, int ac, char **av, char *object) {
-    int n;
-
-    n = 0;
-    while (++n < ac) {
-        if (!strcmp(option, av[n])) {
-            if (n + 1 < ac && strcmp(av[n + 1], object))
-                return (av[n + 1]);
-            else
-                return (0);
-        }
+void freeMeshData(t_mesh *mesh) {
+    free(mesh->vertices.data);
+    free(mesh->indices.data);
+    free(mesh->normales.data);
+    free(mesh->uvs.data);
+    for (int n = 0; n < mesh->segmentNb; n++) {
+        free(mesh->segments[n].name);
+        free(mesh->segments[n].texture);
     }
-    return (0);
+    free(mesh->segments);
 }
 
-char *getObjectFile(int ac, char **av) {
-    int n;
-    char *ret;
-
-    n = 0;
-    while (++n < ac) {
-        ret = strrchr(av[n], '.');
-        if (ret && !strcmp(ret, ".obj"))
-            return (av[n]);
+void freeAll(t_scop *scop) {
+    glDeleteTextures(1, &scop->background.textureID);
+    for (int n = 0; n < scop->object.segmentNb; n++) {
+        glDeleteTextures(1, &scop->object.segments[n].textureID);
+        glDeleteTextures(1, &scop->object.segments[n].normalTextureID);
     }
-    return (0);
+    free(scop->object.segments);
 }
 
-char *ft_strjoin(char const *s1, char const *s2)
-{
-	int		len = strlen(s1);
-	char	*str;
+void limitFPS() {
+    static double oldTime = 0;
+    static double newTime;
 
-	if (!(s1 && s2))
-		return (0);
-	if (!(str = malloc(sizeof(char) * (len + strlen(s2) + 1))))
-		return (0);
-    memcpy(str, s1, len);
-    strcpy(str + len, s2);
-	return (str);
+    newTime = glfwGetTime();
+    if ((newTime - oldTime) * 1000000 < (1000000.0 / MAX_FPS))
+        usleep((1000000.0 / MAX_FPS) - (newTime - oldTime) * 100000);
+    oldTime = glfwGetTime();
 }

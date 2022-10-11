@@ -4,11 +4,13 @@ OBJDIR = .obj/
 INCDIR = includes/
 SRCFILES =	main.c \
 			matrix.c \
+			vector.c \
 			loop.c \
 			init.c \
 			parse_file.c \
 			parse_data.c \
 			utils.c \
+			str_utils.c \
 			event.c \
 			draw.c \
 			VAO.c \

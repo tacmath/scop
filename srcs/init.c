@@ -86,3 +86,37 @@ GLuint textureInit(char *fileName, char *path) {
     return (textureID);
 
 }
+
+int initBackground(t_scop *scop) {
+
+    GLfloat vertices[] =
+    { //     COORDINATES   
+        -1.0f, -1.0f,  0.0f,
+        1.0f, 1.0f,  0.0f,
+        -1.0f, 1.0f,  0.0f,
+        1.0f, -1.0f,  0.0f,
+    };
+
+    GLuint indices[] =
+    {
+        0, 1, 2,
+        0, 1, 3,
+    };
+
+    GLfloat texture[] =
+    {
+        1.0f, 0.0f,
+        0.0f, 1.0f,
+        1.0f, 1.0f,
+        0.0f, 0.0f,
+    };
+
+    scop->background.VAO = initVertexArray((t_array){vertices, 4});
+    initElementArray(scop->background.VAO, (t_array){indices, 6});
+    addArrayBuffer(scop->background.VAO, (t_array){texture, 8}, 2 * sizeof(GLfloat), 1);
+
+    if (!(scop->background.programShader = initShaders("shaders/backgroundVS", "shaders/backgroundFS", scop->path)) ||
+        !(scop->background.textureID = textureInit(BACKGROUND_IMAGE, scop->path)))
+        return (0);
+    return (1);
+}

@@ -9,6 +9,7 @@ in mat3 TBN;
 uniform vec3 lightPos;
 uniform vec3 cameraPos;
 uniform bool activateNormalMap;
+uniform bool hasNormalMap;
 
 uniform sampler2D Texture;
 uniform sampler2D NormalMap;
@@ -16,7 +17,7 @@ uniform sampler2D NormalMap;
 void main()
 {
     vec3 normal = Normal;
-    if (activateNormalMap) {
+    if (hasNormalMap && activateNormalMap ) {
         normal = texture(NormalMap, texCoord).rgb;
         normal = normal * 2 - 1;
         normal = normalize(TBN * normal);

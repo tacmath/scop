@@ -1,14 +1,24 @@
 #include "scop.h"
 
-void getEvents(t_scop *scop) {
-    int state;
-    double posx, posy;
-    static char transition = -1;
-    static char keyStatusT = 1;
+void getNormalKeyEvent(t_scop *scop) {
     static char keyStatusN = 1;
     static char normalMap = 1;
-    
-    glfwPollEvents();
+    int status;
+
+    status = glfwGetKey(scop->window, GLFW_KEY_N);
+    if (status == GLFW_PRESS && keyStatusN) {
+        normalMap = !normalMap;
+        glUniform1i(glGetUniformLocation(scop->object.programShader, "activateNormalMap"), normalMap);
+        keyStatusN = 0;
+    }
+    else if (status == GLFW_RELEASE)
+        keyStatusN = 1;
+}
+
+void getMouseEvent(t_scop *scop) {
+    int state;
+    double posx, posy;
+
     state = glfwGetMouseButton(scop->window, GLFW_MOUSE_BUTTON_LEFT);
     glfwGetCursorPos(scop->window, &posx, &posy);
     if (state == GLFW_PRESS)
@@ -24,24 +34,31 @@ void getEvents(t_scop *scop) {
         rotate(matrix, scop->object.rotation.y, (t_vertex){0.0f, 1.0f, 0.0f}, &tmp);
         rotate(tmp, scop->object.rotation.x, (t_vertex){cos(rotationY), 0.0f, sin(rotationY)}, &scop->rotation);
     }
-    if (glfwGetKey(scop->window, GLFW_KEY_N) == GLFW_PRESS && keyStatusN) {
-        normalMap = !normalMap;
-        glUniform1i(glGetUniformLocation(scop->object.programShader, "activateNormalMap"), normalMap);
-        keyStatusN = 0;
-    }
-    else if (glfwGetKey(scop->window, GLFW_KEY_N) == GLFW_RELEASE)
-        keyStatusN = 1;
+    scop->mouse.x = posx;
+    scop->mouse.y = posy;
+}
 
-    if (glfwGetKey(scop->window, GLFW_KEY_T) == GLFW_PRESS && keyStatusT) {
+void getTransitionKeyEvent(t_scop *scop) {
+    static char transition = -1;
+    static char keyStatusT = 1;
+    int status;
+
+    status = glfwGetKey(scop->window, GLFW_KEY_T);
+    if (status == GLFW_PRESS && keyStatusT) {
         transition = -transition;
         keyStatusT = 0;
     }
-    else if (glfwGetKey(scop->window, GLFW_KEY_T) == GLFW_RELEASE)
+    else if (status == GLFW_RELEASE)
         keyStatusT = 1;
     if (scop->transition >= 0 && transition == -1)
         scop->transition -= 0.02;
     else if (scop->transition <= 1 && transition == 1)
         scop->transition += 0.02;
-    scop->mouse.x = posx;
-    scop->mouse.y = posy;
+}
+
+void getEvents(t_scop *scop) {
+    glfwPollEvents();
+    getMouseEvent(scop);
+    getNormalKeyEvent(scop);
+    getTransitionKeyEvent(scop);
 }

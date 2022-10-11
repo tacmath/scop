@@ -39,16 +39,10 @@ void getTanAndBiTan(t_scop  *scop) {
         !(bitangent = malloc(sizeof(t_vertex) * scop->object.mesh.vertices.size)))
     return ;
     for (int n = 0; n < scop->object.mesh.vertices.size; n += 3) {
-        edge1.x = pos[n + 1].x - pos[n].x;
-        edge1.y = pos[n + 1].y - pos[n].y;
-        edge1.z = pos[n + 1].z - pos[n].z;
-        edge2.x = pos[n + 2].x - pos[n].x;
-        edge2.y = pos[n + 2].y - pos[n].y;
-        edge2.z = pos[n + 2].z - pos[n].z;
-        deltaUV1.x = uv[n + 1].x - uv[n].x;
-        deltaUV1.y = uv[n + 1].y - uv[n].y;
-        deltaUV2.x = uv[n + 2].x - uv[n].x;
-        deltaUV2.y = uv[n + 2].y - uv[n].y;
+        edge1 = vec3sub(pos[n + 1], pos[n]);
+        edge2 = vec3sub(pos[n + 2], pos[n]);
+        deltaUV1 = vec2sub(uv[n + 1], uv[n]);
+        deltaUV2 = vec2sub(uv[n + 2], uv[n]);
 
         f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
 

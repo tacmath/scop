@@ -46,8 +46,6 @@ void mainLoop(t_scop *scop) {
     GLuint cameraPosLoc =  glGetUniformLocation(scop->object.programShader, "cameraPos");
     GLuint modelMatrixLoc =  glGetUniformLocation(scop->object.programShader, "model");
     GLuint transitionLoc = glGetUniformLocation(scop->object.programShader, "transition");
-    double oldTime = glfwGetTime();
-    double newTime;
    
     initUniforms(scop);
     while ( glfwGetKey(scop->window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
@@ -63,10 +61,6 @@ void mainLoop(t_scop *scop) {
         drawObject(scop, modelMatrixLoc);
 		glfwSwapBuffers(scop->window);
         getEvents(scop);
-
-        newTime = glfwGetTime();
-        if ((newTime - oldTime) * 1000000 < (1000000.0 / MAX_FPS))
-            usleep((1000000.0 / MAX_FPS) - (newTime - oldTime) * 100000);
-        oldTime = glfwGetTime();
+        limitFPS();
     }
 }

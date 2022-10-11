@@ -48,14 +48,6 @@ void perspective(float fov, float ratio, float near, float far, t_mat4 *result) 
     memcpy(result, &matrix, sizeof(t_mat4));
 }
 
-void normalise(t_vertex *vector) {
-    float normal = sqrt(vector->x * vector->x + vector->y * vector->y + vector->z * vector->z);
-
-    vector->x /= normal;
-    vector->y /= normal;
-    vector->z /= normal;
-}
-
 void rotate(t_mat4 matrix, float angle, t_vertex vector, t_mat4 *result) {
     float c = cosf((PI / 180.0f) * angle);
     float s = sinf((PI / 180.0f) * angle);

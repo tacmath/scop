@@ -148,14 +148,21 @@ void rotate(t_mat4 matrix, float angle, t_vertex vector, t_mat4 *result);
 void mat4Scale(t_mat4 *result, t_vertex vector);
 void mat4Mult(t_mat4 mat1, t_mat4 mat2, t_mat4 *result);
 void printMat4(t_mat4 mat4);
-void normalise(t_vertex *vector);
 void mat4SetIdentity(t_mat4 *matrix);
+
+//  vector.c
+
+void normalise(t_vertex *vector);
+t_vertex vec3sub(t_vertex v1, t_vertex v2);
+t_vec2 vec2sub(t_vec2 v1, t_vec2 v2);
+
 
 //  loop.c
 
 void setModelMatrix(t_scop *scop, GLuint matrixLoc);
 void setVPMatrix(t_scop *scop, GLuint matrixLoc);
 void mainLoop(t_scop *scop);
+int initBackground(t_scop *scop);
 
 //  parce_file.c
 
@@ -171,8 +178,14 @@ void parseNormals(t_scop  *scop);
 char *getShaderSource(char *fileName);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void printUsage();
-char *getObjectFile(int ac, char **av);
+void freeMeshData(t_mesh *mesh);
+void freeAll(t_scop *scop);
+void limitFPS();
+
+//  str_utils.c
 char *ft_strjoin(char const *s1, char const *s2);
+char *ft_replaceStr(char *str, char *ref, char *replace);
+char *getObjectFile(int ac, char **av);
 char *getOption(char *option, int ac, char **av, char *object);
 
 //  init.c
