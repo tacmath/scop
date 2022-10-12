@@ -150,11 +150,10 @@ unsigned int skyboxIndices[] =
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-    
+    stbi_set_flip_vertically_on_load(0);
     for (int n = 0; n < 6; n++) {
         int x, y, comp;
         char *data = stbi_load(texturesName[n], &x, &y, &comp, 0);
-        stbi_set_flip_vertically_on_load(0);
         if (data) {
             glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + n, 0, GL_RGB, x, y, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
             stbi_image_free(data);
