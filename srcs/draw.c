@@ -1,13 +1,13 @@
 #include "scop.h"
 
 void drawBackground(t_scop *scop) {
-        glDisable(GL_DEPTH_TEST);
-        glUseProgram(scop->background.programShader);
-        glBindVertexArray(scop->background.VAO);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, scop->background.textureID);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-        glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
+    glUseProgram(scop->background.programShader);
+    glBindVertexArray(scop->background.VAO);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, scop->background.textureID);
+    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+    glDepthFunc(GL_LESS);
 }
 
 void drawObject(t_scop *scop, GLuint modelMatrixLoc) {

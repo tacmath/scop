@@ -162,7 +162,6 @@ t_vec2 vec2sub(t_vec2 v1, t_vec2 v2);
 //  loop.c
 
 void setModelMatrix(t_scop *scop, GLuint matrixLoc);
-void setVPMatrix(t_scop *scop, GLuint matrixLoc);
 void mainLoop(t_scop *scop);
 int initBackground(t_scop *scop);
 
@@ -194,7 +193,7 @@ char *getOption(char *option, int ac, char **av, char *object);
 
 int initWindow(t_scop *scop);
 GLuint initShaders(char *vertexShaderFile, char *fragmentShaderFile, char *path);
-GLuint textureInit(char *fileName, char *path);
+GLuint textureInit(char *fileName);
 
 // VAO.c
 GLuint initVertexArray(t_array vertices);

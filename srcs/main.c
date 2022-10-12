@@ -43,11 +43,13 @@ void enableOptionalTextures(t_scop *scop) {
 
 int loadAllTextures(t_scop *scop) {
     char *normalFileName;
+    char *defaultTexture;
 
+    defaultTexture = ft_strjoin(scop->path, scop->option.texture);
     for (int n = 0; n < scop->object.segmentNb; n++) {
         if (!scop->object.mesh.segments[n].texture ||
-            !(scop->object.segments[n].textureID = textureInit(scop->object.mesh.segments[n].texture, ""))) {
-            if (!(scop->object.segments[n].textureID = textureInit(scop->option.texture, scop->path)))
+            !(scop->object.segments[n].textureID = textureInit(scop->object.mesh.segments[n].texture))) {
+            if (!(scop->object.segments[n].textureID = textureInit(defaultTexture)))
                 return (0);
         }
         else {
@@ -55,10 +57,11 @@ int loadAllTextures(t_scop *scop) {
             if (!normalFileName) {
                 continue;
             }
-            scop->object.segments[n].normalTextureID = textureInit(normalFileName, "");
+            scop->object.segments[n].normalTextureID = textureInit(normalFileName);
             free(normalFileName);
         }
     }
+    free(defaultTexture);
     enableOptionalTextures(scop);
     return (1);
 }

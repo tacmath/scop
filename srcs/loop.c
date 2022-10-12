@@ -9,7 +9,7 @@ void initUniforms(t_scop *scop) {
 
 
     glUseProgram(scop->background.programShader);
-    glUniform1i(glGetUniformLocation(scop->background.programShader, "backgroundTex"), 0);
+    glUniform1i(glGetUniformLocation(scop->background.programShader, "skybox"), 0);
 
     glUseProgram(scop->object.programShader);
     glUniform3fv(glGetUniformLocation(scop->object.programShader, "Osize"), 1, (void*)(&objectSize));
@@ -37,17 +37,19 @@ void setVPMatrix(t_scop *scop, GLuint matrixLoc) {
     mat4Traslate(&view, (t_vertex){0.0f, 0.0f, cameraPosZ - (scop->object.mesh.max.y - scop->object.mesh.min.y) * 2});
     mat4Mult(view, scop->rotation, &matrix);
     mat4Mult(scop->projection, matrix, &view);
-    glUniformMatrix4fv(matrixLoc, 1, GL_TRUE, (GLfloat*)view); 
+    glUniformMatrix4fv(matrixLoc, 1, GL_TRUE, (GLfloat*)view);
 }
 
 void mainLoop(t_scop *scop) {
-    GLuint matrixLoc =  glGetUniformLocation(scop->object.programShader, "matrix");
-    GLuint cameraPosLoc =  glGetUniformLocation(scop->object.programShader, "cameraPos");
-    GLuint modelMatrixLoc =  glGetUniformLocation(scop->object.programShader, "model");
-    GLuint transitionLoc = glGetUniformLocation(scop->object.programShader, "transition");
+    GLuint matrixLoc =          glGetUniformLocation(scop->object.programShader, "matrix");
+    GLuint backgroundMatrixLoc = glGetUniformLocation(scop->background.programShader, "matrix");
+    GLuint cameraPosLoc =       glGetUniformLocation(scop->object.programShader, "cameraPos");
+    GLuint modelMatrixLoc =     glGetUniformLocation(scop->object.programShader, "model");
+    GLuint transitionLoc =      glGetUniformLocation(scop->object.programShader, "transition");
     t_mat4 matrix;
    
     initUniforms(scop);
+    glEnable(GL_DEPTH_TEST);
     while ( glfwGetKey(scop->window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
             glfwWindowShouldClose(scop->window) == 0 ) {
         
@@ -60,6 +62,10 @@ void mainLoop(t_scop *scop) {
         glUniform3fv(cameraPosLoc, 1, (void*)(&carmeraPos));
     //    glUniform3fv(glGetUniformLocation(scop->object.programShader, "lightPos"), 1, (void*)(&carmeraPos));
         setVPMatrix(scop, matrixLoc);
+        
+        mat4Mult(scop->projection, scop->rotation, &matrix);
+        glUseProgram(scop->background.programShader);
+        glUniformMatrix4fv(backgroundMatrixLoc, 1, GL_TRUE, (GLfloat*)matrix);
 
         glClear(GL_DEPTH_BUFFER_BIT);
         drawBackground(scop);
