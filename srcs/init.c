@@ -89,6 +89,33 @@ GLuint textureInit(char *fileName) {
 
 }
 
+GLuint cubeMapInit(char **texturesName) {
+    GLuint cubeMapId;
+    int x, y, comp;
+    char *data;
+
+    glGenTextures(1, &cubeMapId);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapId);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+    stbi_set_flip_vertically_on_load(0);
+    for (int n = 0; n < 6; n++) {
+        data = stbi_load(texturesName[n], &x, &y, &comp, 0);
+        if (data) {
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + n, 0, GL_RGB, x, y, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+            stbi_image_free(data);
+        }
+        else
+            dprintf(2, "failed to load %s\n", texturesName[n]);
+    }
+    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+    return (cubeMapId);
+}
+
 int initBackground(t_scop *scop) {
 
 float skyboxVertices[] =
@@ -141,28 +168,9 @@ unsigned int skyboxIndices[] =
 
     scop->background.VAO = initVertexArray((t_array){skyboxVertices, 8});
     initElementArray(scop->background.VAO, (t_array){skyboxIndices, 36});
-
-    glGenTextures(1, &scop->background.textureID);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, scop->background.textureID);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
-    stbi_set_flip_vertically_on_load(0);
-    for (int n = 0; n < 6; n++) {
-        int x, y, comp;
-        char *data = stbi_load(texturesName[n], &x, &y, &comp, 0);
-        if (data) {
-            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + n, 0, GL_RGB, x, y, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-            stbi_image_free(data);
-        }
-        else
-            dprintf(2, "failed to load %s\n", texturesName[n]);
+    scop->background.textureID = cubeMapInit(texturesName);
+    for (int n = 0; n < 6; n++)
         free(texturesName[n]);
-    }
-    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
     if (!(scop->background.programShader = initShaders("shaders/backgroundVS", "shaders/backgroundFS", scop->path)))
         return (0);
     return (1);

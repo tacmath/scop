@@ -63,5 +63,6 @@ void limitFPS() {
     newTime = glfwGetTime();
     if ((newTime - oldTime) * 1000000 < (1000000.0 / MAX_FPS))
         usleep((1000000.0 / MAX_FPS) - (newTime - oldTime) * 100000);
+//    printf("delta FPS = %f\n", (1000000.0 / MAX_FPS) - (newTime - oldTime) * 100000);
     oldTime = glfwGetTime();
 }

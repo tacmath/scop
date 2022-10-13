@@ -50,10 +50,14 @@ void getTransitionKeyEvent(t_scop *scop) {
     }
     else if (status == GLFW_RELEASE)
         keyStatusT = 1;
-    if (scop->transition >= 0 && transition == -1)
+    if (scop->transition >= 0 && transition == -1) {
         scop->transition -= 0.02;
-    else if (scop->transition <= 1 && transition == 1)
+        glUniform1f(glGetUniformLocation(scop->object.programShader, "transition"), scop->transition);
+    }
+    else if (scop->transition <= 1 && transition == 1) {
         scop->transition += 0.02;
+        glUniform1f(glGetUniformLocation(scop->object.programShader, "transition"), scop->transition);
+    }
 }
 
 void getEvents(t_scop *scop) {
