@@ -52,6 +52,8 @@ void freeAll(t_scop *scop) {
     for (int n = 0; n < scop->object.segmentNb; n++) {
         glDeleteTextures(1, &scop->object.segments[n].textureID);
         glDeleteTextures(1, &scop->object.segments[n].normalTextureID);
+        glDeleteTextures(1, &scop->object.segments[n].metalTextureID);
+        glDeleteTextures(1, &scop->object.segments[n].routhTextureID);
     }
     free(scop->object.segments);
 }

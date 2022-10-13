@@ -97,6 +97,8 @@ struct s_segment {
     GLuint      VAO;
     GLuint      textureID;
     GLuint      normalTextureID;
+    GLuint      metalTextureID;
+    GLuint      routhTextureID;
 };
 
 typedef struct s_segment t_segment;

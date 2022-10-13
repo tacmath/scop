@@ -9,10 +9,39 @@ in mat3 TBN;
 uniform vec3 lightPos;
 uniform vec3 cameraPos;
 uniform bool activateNormalMap;
+uniform bool activatePBR;
 uniform bool hasNormalMap;
 
 uniform sampler2D Texture;
 uniform sampler2D NormalMap;
+uniform sampler2D MetalMap;
+uniform sampler2D RouthnessMap;
+
+float GeometrySmith(float NdotV, float NdotL, float k)
+{
+    float ggx1 = NdotV / (NdotV * (1.0f - k) + k);
+    float ggx2 = NdotL / (NdotL * (1.0f - k) + k);
+	
+    return ggx1 * ggx2;
+}
+
+
+float DistributionGGX(vec3 N, vec3 H, float a)
+{
+    float a2     = a*a;
+    float NdotH  = max(dot(N, H), 0.0f);
+	
+    float nom    = a2;
+    float denom  = (NdotH * NdotH * (a2 - 1.0f) + 1.0f);
+    denom        = 3.14159265f * denom * denom;
+	
+    return nom / max(denom, 0.0000001);
+}
+
+vec3 fresnelSchlick(float cosTheta, vec3 baseReflectivity)
+{
+    return baseReflectivity + (1.0 - baseReflectivity) * pow(1.0 - cosTheta, 5.0);
+}
 
 void main()
 {
@@ -25,7 +54,8 @@ void main()
     
     vec3 Color = texture(Texture, texCoord).rgb;
 
-    float ambiant = 0.2f;
+    if (!activatePBR) {
+    float ambient = 0.2f;
     vec3 lightDirection = normalize(lightPos - currentPos);
     float diffuse = max(dot(normal, lightDirection), 0.0f);
 
@@ -34,6 +64,47 @@ void main()
     vec3 reflectionDirection = reflect(-lightDirection, normal);
     float specAmmunt = pow(max(dot(viewDirection, reflectionDirection), 0.0f), 16);
     float specular = specAmmunt * specularLight;
+    
+    FragColor = vec4(Color * (diffuse + ambient + specular), 1.0f);
+    }
+    else {
+        float metallic = texture(MetalMap, texCoord).r;
+        float roughness = texture(RouthnessMap, texCoord).r;
 
-    FragColor = vec4(Color * (diffuse + ambiant + specular), 1.0f);
+        vec3 Lo = vec3(0.0f);
+
+        vec3 L = normalize(lightPos - currentPos);
+        vec3 V = normalize(cameraPos - currentPos);
+        vec3 H = normalize(V + L);
+        float distance = length(lightPos - currentPos) / 1500;
+        float attenuation = 1.0f / (distance * distance);
+        vec3 radiance = vec3(1.0f) * attenuation; //light color * attenuation
+
+        float cosTheta = max(dot(H, normal), 0.0f);  
+        vec3 baseReflectivity = mix(vec3(0.04), Color, roughness);
+        float NdotV = max(dot(normal, V), 0.0000001f);
+        float NdotL = max(dot(normal, L), 0.0000001f);
+
+        float D = DistributionGGX(normal, H, roughness);
+        float G = GeometrySmith(NdotV, NdotL, roughness);
+        vec3 F = fresnelSchlick(cosTheta, baseReflectivity);
+
+        vec3 specular = (D * G * F) / (4.0f * NdotV * NdotL);
+
+        vec3 kD = vec3(1.0f) - F;
+
+        kD *= 1.0f - metallic;
+
+        Lo += (kD * Color / 3.14159265f + specular) * radiance * NdotL;
+
+        vec3 ambient = vec3(0.3f) * Color;
+
+        vec3 color = ambient + Lo;
+
+    //    color = color / (color + vec3(1.0f)); //tonemapping
+
+    //    color = pow(color, vec3(1.0f/2.2f));
+
+        FragColor = vec4(color, 1.0f);
+    }
 }

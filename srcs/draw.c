@@ -19,6 +19,10 @@ void drawObject(t_scop *scop, GLuint modelMatrixLoc) {
         glBindTexture(GL_TEXTURE_2D, scop->object.segments[n].textureID);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, scop->object.segments[n].normalTextureID);
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, scop->object.segments[n].metalTextureID);
+        glActiveTexture(GL_TEXTURE3);
+        glBindTexture(GL_TEXTURE_2D, scop->object.segments[n].routhTextureID);
         if (scop->object.mesh.indices.size)
             glDrawElements(GL_TRIANGLES, scop->object.mesh.indices.size , GL_UNSIGNED_INT, 0);
         else

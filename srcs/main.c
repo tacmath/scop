@@ -35,6 +35,8 @@ void enableOptionalTextures(t_scop *scop) {
     for (int n = 0; n < scop->object.segmentNb; n++) {
         if (scop->object.segments[n].normalTextureID) {
             glUniform1i(glGetUniformLocation(scop->object.programShader, "hasNormalMap"), 1);
+            if (scop->object.segments[n].metalTextureID && scop->object.segments[n].routhTextureID)
+                glUniform1i(glGetUniformLocation(scop->object.programShader, "activatePBR"), 1);
             break ;
         }
     }
@@ -42,7 +44,7 @@ void enableOptionalTextures(t_scop *scop) {
 }
 
 int loadAllTextures(t_scop *scop) {
-    char *normalFileName;
+    char *fileName;
     char *defaultTexture;
 
     defaultTexture = ft_strjoin(scop->path, scop->option.texture);
@@ -53,12 +55,21 @@ int loadAllTextures(t_scop *scop) {
                 return (0);
         }
         else {
-            normalFileName = ft_replaceStr(scop->object.mesh.segments[n].texture, "Base_color", "Normal_OpenGL");
-            if (!normalFileName) {
+            fileName = ft_replaceStr(scop->object.mesh.segments[n].texture, "Base_color", "Normal_OpenGL");
+            if (!fileName)
                 continue;
-            }
-            scop->object.segments[n].normalTextureID = textureInit(normalFileName);
-            free(normalFileName);
+            scop->object.segments[n].normalTextureID = textureInit(fileName);
+            free(fileName);
+            fileName = ft_replaceStr(scop->object.mesh.segments[n].texture, "Base_color", "Metallic");
+            if (!fileName)
+                continue;
+            scop->object.segments[n].metalTextureID = textureInit(fileName);
+            free(fileName);
+            fileName = ft_replaceStr(scop->object.mesh.segments[n].texture, "Base_color", "Roughness");
+            if (!fileName)
+                continue;
+            scop->object.segments[n].routhTextureID = textureInit(fileName);
+            free(fileName);
         }
     }
     free(defaultTexture);

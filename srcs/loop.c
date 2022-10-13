@@ -18,6 +18,8 @@ static void initUniforms(t_scop *scop) {
     glUniform1i(glGetUniformLocation(scop->object.programShader, "activateNormalMap"), 1);
     glUniform1i(glGetUniformLocation(scop->object.programShader, "Texture"), 0); 
     glUniform1i(glGetUniformLocation(scop->object.programShader, "NormalMap"), 1);
+    glUniform1i(glGetUniformLocation(scop->object.programShader, "MetalMap"), 2); 
+    glUniform1i(glGetUniformLocation(scop->object.programShader, "RouthnessMap"), 3);
 }
 
 void setModelMatrix(t_scop *scop, GLuint matrixLoc) {
@@ -57,7 +59,7 @@ static void moveCamera(t_scop *scop) {
     mat4Transpose(&matrix);
     carmeraPos = mat4Vec3Mult(matrix, (t_vertex){0.0f, 0.0f, -(cameraPosZ - (scop->object.mesh.max.y - scop->object.mesh.min.y) * 2)});
     glUniform3fv(cameraPosLoc, 1, (void*)(&carmeraPos));
-//    glUniform3fv(glGetUniformLocation(scop->object.programShader, "lightPos"), 1, (void*)(&carmeraPos));
+ //   glUniform3fv(glGetUniformLocation(scop->object.programShader, "lightPos"), 1, (void*)(&carmeraPos));
     setVPMatrix(scop, matrixLoc);
     
     mat4Mult(scop->projection, scop->rotation, &matrix);
