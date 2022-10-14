@@ -70,6 +70,11 @@ int loadAllTextures(t_scop *scop) {
                 continue;
             scop->object.segments[n].routhTextureID = textureInit(fileName);
             free(fileName);
+            fileName = ft_replaceStr(scop->object.mesh.segments[n].texture, "Base_color", "Mixed_AO");
+            if (!fileName)
+                continue;
+            scop->object.segments[n].AOTextureID = textureInit(fileName);
+            free(fileName);
         }
     }
     free(defaultTexture);

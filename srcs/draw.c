@@ -10,19 +10,25 @@ void drawBackground(t_scop *scop) {
     glDepthFunc(GL_LESS);
 }
 
+void setSegmentTextures(t_segment *segment) {
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, segment->textureID);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, segment->normalTextureID);
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, segment->metalTextureID);
+    glActiveTexture(GL_TEXTURE3);
+    glBindTexture(GL_TEXTURE_2D, segment->routhTextureID);
+    glActiveTexture(GL_TEXTURE4);
+    glBindTexture(GL_TEXTURE_2D, segment->AOTextureID);
+}
+
 void drawObject(t_scop *scop, GLuint modelMatrixLoc) {
     glUseProgram(scop->object.programShader);
     setModelMatrix(scop, modelMatrixLoc);
     for (int n = 0; n < scop->object.segmentNb; n++) {
         glBindVertexArray(scop->object.segments[n].VAO);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, scop->object.segments[n].textureID);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, scop->object.segments[n].normalTextureID);
-        glActiveTexture(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_2D, scop->object.segments[n].metalTextureID);
-        glActiveTexture(GL_TEXTURE3);
-        glBindTexture(GL_TEXTURE_2D, scop->object.segments[n].routhTextureID);
+        setSegmentTextures(&scop->object.segments[n]);
         if (scop->object.mesh.indices.size)
             glDrawElements(GL_TRIANGLES, scop->object.mesh.indices.size , GL_UNSIGNED_INT, 0);
         else

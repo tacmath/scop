@@ -20,6 +20,7 @@ static void initUniforms(t_scop *scop) {
     glUniform1i(glGetUniformLocation(scop->object.programShader, "NormalMap"), 1);
     glUniform1i(glGetUniformLocation(scop->object.programShader, "MetalMap"), 2); 
     glUniform1i(glGetUniformLocation(scop->object.programShader, "RouthnessMap"), 3);
+    glUniform1i(glGetUniformLocation(scop->object.programShader, "AOMap"), 4);
 }
 
 void setModelMatrix(t_scop *scop, GLuint matrixLoc) {

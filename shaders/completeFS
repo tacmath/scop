@@ -16,6 +16,7 @@ uniform sampler2D Texture;
 uniform sampler2D NormalMap;
 uniform sampler2D MetalMap;
 uniform sampler2D RouthnessMap;
+uniform sampler2D AOMap;
 
 float GeometrySmith(float NdotV, float NdotL, float k)
 {
@@ -70,13 +71,14 @@ void main()
     else {
         float metallic = texture(MetalMap, texCoord).r;
         float roughness = texture(RouthnessMap, texCoord).r;
+        float ao = texture(AOMap, texCoord).r;
 
         vec3 Lo = vec3(0.0f);
 
         vec3 L = normalize(lightPos - currentPos);
         vec3 V = normalize(cameraPos - currentPos);
         vec3 H = normalize(V + L);
-        float distance = length(lightPos - currentPos) / 1500;
+        float distance = length(lightPos - currentPos) / 1900;
         float attenuation = 1.0f / (distance * distance);
         vec3 radiance = vec3(1.0f) * attenuation; //light color * attenuation
 
@@ -97,7 +99,7 @@ void main()
 
         Lo += (kD * Color / 3.14159265f + specular) * radiance * NdotL;
 
-        vec3 ambient = vec3(0.3f) * Color;
+        vec3 ambient = vec3(0.3f) * Color * ao;
 
         vec3 color = ambient + Lo;
 
