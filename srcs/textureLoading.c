@@ -211,8 +211,10 @@ int loadAllTextures(t_scop *scop) {
             return (0);
         }
         textureID = textureInit(texture);
-        for (int n = 0; n < scop->object.segmentNb; n++)
+        for (int n = 0; n < scop->object.segmentNb; n++) {
+            free(scop->object.mesh.segments[n].texture);
             scop->object.segments[n].textureID = textureID;
+        }
         free(defaultTexture);
         return (1);
     }
