@@ -211,10 +211,8 @@ int loadAllTextures(t_scop *scop) {
             return (0);
         }
         textureID = textureInit(texture);
-        for (int n = 0; n < scop->object.segmentNb; n++) {
-            free(scop->object.mesh.segments[n].texture);
+        for (int n = 0; n < scop->object.segmentNb; n++)
             scop->object.segments[n].textureID = textureID;
-        }
         free(defaultTexture);
         return (1);
     }
@@ -226,9 +224,10 @@ int loadAllTextures(t_scop *scop) {
     free(defaultTexture);
     if (!(scop->textures.texturesName = calloc(sizeof(char*), scop->object.segmentNb)))
         return (0);
-    for (int n = 0; n < scop->object.segmentNb; n++)
-        if (scop->object.mesh.segments[n].texture)
+    for (int n = 0; n < scop->object.segmentNb; n++) {
             scop->textures.texturesName[n] = scop->object.mesh.segments[n].texture;
+            scop->object.mesh.segments[n].texture = 0;
+    }
     scop->textures.segmentNb = scop->object.segmentNb;
     pthread_create(&thread, 0, loadAllTexturesThread, &scop->textures);
     return (1);
