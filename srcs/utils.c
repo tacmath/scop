@@ -40,10 +40,8 @@ void freeMeshData(t_mesh *mesh) {
     free(mesh->indices.data);
     free(mesh->normales.data);
     free(mesh->uvs.data);
-    for (int n = 0; n < mesh->segmentNb; n++) {
+    for (int n = 0; n < mesh->segmentNb; n++)
         free(mesh->segments[n].name);
-        free(mesh->segments[n].texture);
-    }
     free(mesh->segments);
 }
 

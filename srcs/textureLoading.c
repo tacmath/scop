@@ -226,7 +226,7 @@ int loadAllTextures(t_scop *scop) {
         return (0);
     for (int n = 0; n < scop->object.segmentNb; n++)
         if (scop->object.mesh.segments[n].texture)
-            scop->textures.texturesName[n] = strdup(scop->object.mesh.segments[n].texture);
+            scop->textures.texturesName[n] = scop->object.mesh.segments[n].texture;
     scop->textures.segmentNb = scop->object.segmentNb;
     pthread_create(&thread, 0, loadAllTexturesThread, &scop->textures);
     return (1);
