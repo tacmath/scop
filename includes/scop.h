@@ -7,6 +7,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <math.h>
+#include <pthread.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -17,8 +18,21 @@
 # define WINDOW_WIDTH   400.0
 # define WINDOW_HEIGHT  300.0
 # define MAX_FPS        60
-# define BACKGROUND_IMAGE "texture/plaines.jpeg"
+# define LOADED         1
+# define SKYBOX_TEXTURE(x)  x & 7
+# define TEX_PER_SEGMENT 5
+# define TEX_OBJECT_VALUE 10
+
+
+# define CUBE_MAP_PX "texture/TXR_ENV_Skybox_Cloud Layers__Cam_2_Left+X.png"
+# define CUBE_MAP_NX "texture/TXR_ENV_Skybox_Cloud Layers__Cam_3_Right-X.png"
+# define CUBE_MAP_PY "texture/TXR_ENV_Skybox_Cloud Layers__Cam_4_Up+Y.png"
+# define CUBE_MAP_NY "texture/TXR_ENV_Skybox_Cloud Layers__Cam_5_Down-Y.png"
+# define CUBE_MAP_PZ "texture/TXR_ENV_Skybox_Cloud Layers__Cam_0_Front+Z.png"
+# define CUBE_MAP_NZ "texture/TXR_ENV_Skybox_Cloud Layers__Cam_1_Back-Z.png"
+
 # define DEFAULT_TEXTURE "texture/test.jpeg"
+
 
 #define IDENTITY_MAT4 {{1.0f,0.0f,0.0f,0.0f},{0.0f,1.0f,0.0f,0.0f},{0.0f,0.0f,1.0f,0.0f},{0.0f,0.0f,0.0f,1.0f}};
 
@@ -94,12 +108,12 @@ struct s_texture {
 typedef struct s_texture t_texture;
 
 struct s_segment {
-    GLuint      VAO;
     GLuint      textureID;
     GLuint      normalTextureID;
     GLuint      metalTextureID;
     GLuint      routhTextureID;
     GLuint      AOTextureID;
+    GLuint      VAO;
 };
 
 typedef struct s_segment t_segment;
@@ -128,6 +142,24 @@ struct s_option {
 
 typedef struct s_option t_option;
 
+struct s_textureInfo {
+    t_texture   texture;
+    char        status;
+};
+
+typedef struct s_textureInfo t_textureInfo;
+
+struct s_textureLoader {
+    t_textureInfo   cubeMap[6];
+    t_textureInfo   *object;
+    char            **texturesName;
+    GLuint          segmentNb;
+    GLuint          defaultTextureID;
+    unsigned int    texturesLeft;
+};
+
+typedef struct s_textureLoader t_textureLoader;
+
 struct s_scop {
     GLFWwindow  *window;
     char        *path;
@@ -136,6 +168,7 @@ struct s_scop {
     t_position  mouse;
     t_background background;
     t_object    object;
+    t_textureLoader textures;
     t_mat4      projection;
     t_mat4      rotation;
     t_vertex    lightPos;
@@ -166,7 +199,14 @@ t_vec2 vec2sub(t_vec2 v1, t_vec2 v2);
 
 void setModelMatrix(t_scop *scop, GLuint matrixLoc);
 void mainLoop(t_scop *scop);
+
+//  cubeMap.c
 int initBackground(t_scop *scop);
+void *loadCubeMap(void *data);
+
+// textureLoading.c
+void bindAllTextures(t_scop *scop);
+
 
 //  parce_file.c
 
@@ -196,7 +236,6 @@ char *getOption(char *option, int ac, char **av, char *object);
 
 int initWindow(t_scop *scop);
 GLuint initShaders(char *vertexShaderFile, char *fragmentShaderFile, char *path);
-GLuint textureInit(char *fileName);
 
 // VAO.c
 GLuint initVertexArray(t_array vertices);

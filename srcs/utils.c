@@ -49,6 +49,7 @@ void freeMeshData(t_mesh *mesh) {
 
 void freeAll(t_scop *scop) {
     glDeleteTextures(1, &scop->background.textureID);
+    glDeleteTextures(1, &scop->textures.defaultTextureID);
     for (int n = 0; n < scop->object.segmentNb; n++) {
         glDeleteTextures(1, &scop->object.segments[n].textureID);
         glDeleteTextures(1, &scop->object.segments[n].normalTextureID);
@@ -56,6 +57,7 @@ void freeAll(t_scop *scop) {
         glDeleteTextures(1, &scop->object.segments[n].routhTextureID);
     }
     free(scop->object.segments);
+    free(scop->textures.object);
 }
 
 void limitFPS() {

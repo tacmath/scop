@@ -2,6 +2,8 @@
 
 float ObjectSize = 0;
 
+int loadAllTextures(t_scop *scop);
+
 int generateVAO(t_scop  *scop) {
     t_array segment;
 
@@ -27,58 +29,6 @@ int generateVAO(t_scop  *scop) {
         addArrayBuffer(scop->object.segments[n].VAO, segment, sizeof(t_vec2), 1);
     }
     parseNormals(scop);
-    return (1);
-}
-
-void enableOptionalTextures(t_scop *scop) {
-    glUseProgram(scop->object.programShader);
-    for (int n = 0; n < scop->object.segmentNb; n++) {
-        if (scop->object.segments[n].normalTextureID) {
-            glUniform1i(glGetUniformLocation(scop->object.programShader, "hasNormalMap"), 1);
-            if (scop->object.segments[n].metalTextureID && scop->object.segments[n].routhTextureID)
-                glUniform1i(glGetUniformLocation(scop->object.programShader, "activatePBR"), 1);
-            break ;
-        }
-    }
-    glUseProgram(0);
-}
-
-int loadAllTextures(t_scop *scop) {
-    char *fileName;
-    char *defaultTexture;
-
-    defaultTexture = ft_strjoin(scop->path, scop->option.texture);
-    for (int n = 0; n < scop->object.segmentNb; n++) {
-        if (!scop->object.mesh.segments[n].texture ||
-            !(scop->object.segments[n].textureID = textureInit(scop->object.mesh.segments[n].texture))) {
-            if (!(scop->object.segments[n].textureID = textureInit(defaultTexture)))
-                return (0);
-        }
-        else {
-            fileName = ft_replaceStr(scop->object.mesh.segments[n].texture, "Base_color", "Normal_OpenGL");
-            if (!fileName)
-                continue;
-            scop->object.segments[n].normalTextureID = textureInit(fileName);
-            free(fileName);
-            fileName = ft_replaceStr(scop->object.mesh.segments[n].texture, "Base_color", "Metallic");
-            if (!fileName)
-                continue;
-            scop->object.segments[n].metalTextureID = textureInit(fileName);
-            free(fileName);
-            fileName = ft_replaceStr(scop->object.mesh.segments[n].texture, "Base_color", "Roughness");
-            if (!fileName)
-                continue;
-            scop->object.segments[n].routhTextureID = textureInit(fileName);
-            free(fileName);
-            fileName = ft_replaceStr(scop->object.mesh.segments[n].texture, "Base_color", "Mixed_AO");
-            if (!fileName)
-                continue;
-            scop->object.segments[n].AOTextureID = textureInit(fileName);
-            free(fileName);
-        }
-    }
-    free(defaultTexture);
-    enableOptionalTextures(scop);
     return (1);
 }
 

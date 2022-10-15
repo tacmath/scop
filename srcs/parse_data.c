@@ -11,12 +11,7 @@ int parseArguments(int ac, char **av, t_scop  *scop) {
         printUsage();
         return (0);
     }
-    if (!(scop->option.texture = getOption("-t", ac, av, objectFile))) {
-     //   if (!scop->object.mesh.segments[0].texture)
-            scop->option.texture = DEFAULT_TEXTURE;
-    }
-    else
-        scop->option.texture = scop->option.texture;
+    scop->option.texture = getOption("-t", ac, av, objectFile);
     return (1);
 }
 

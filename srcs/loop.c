@@ -76,6 +76,7 @@ void mainLoop(t_scop *scop) {
     while ( glfwGetKey(scop->window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
             glfwWindowShouldClose(scop->window) == 0 ) {
         glClear(GL_DEPTH_BUFFER_BIT);
+        bindAllTextures(scop);
         moveCamera(scop);
         drawBackground(scop);
         drawObject(scop, modelMatrixLoc);

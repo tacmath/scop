@@ -13,6 +13,8 @@ SRCFILES =	main.c \
 			str_utils.c \
 			event.c \
 			draw.c \
+			cubeMap.c \
+			textureLoading.c \
 			VAO.c \
 
 INCFILES = scop.h stb_image.h
@@ -23,7 +25,7 @@ OBJ = $(SRCFILES:.c=.o)
 OBJS = $(addprefix $(OBJDIR),$(OBJ))
 
 FLAG = -I includes #-I ~/.brew/Cellar/glew/2.2.0_1/include -I ~/.brew/Cellar/glfw/3.3.8/include 
-LINK = -lglfw -lGLEW -lGL -lstb -lm # -L ~/.brew/Cellar/glew/2.2.0_1/lib -L ~/.brew/Cellar/glfw/3.3.8/lib
+LINK = -lglfw -lGLEW -lGL -lstb -lm -lpthread# -L ~/.brew/Cellar/glew/2.2.0_1/lib -L ~/.brew/Cellar/glfw/3.3.8/lib
 
 all: $(NAME)
 
