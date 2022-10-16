@@ -23,14 +23,8 @@
 # define TEX_PER_SEGMENT 5
 # define TEX_OBJECT_VALUE 10
 
-# define CUBE_MAP_FILE "cave_entry_in_the_forest.hdr"
+# define CUBE_MAP_FILE "texture/newport_loft.hdr"//"texture/panorama_map.hdr"//"texture/cave_entry_in_the_forest.hdr"//
 # define CUBE_MAP_RESOLUTION 512
-# define CUBE_MAP_PX "texture/TXR_ENV_Skybox_Cloud Layers__Cam_2_Left+X.png"
-# define CUBE_MAP_NX "texture/TXR_ENV_Skybox_Cloud Layers__Cam_3_Right-X.png"
-# define CUBE_MAP_PY "texture/TXR_ENV_Skybox_Cloud Layers__Cam_4_Up+Y.png"
-# define CUBE_MAP_NY "texture/TXR_ENV_Skybox_Cloud Layers__Cam_5_Down-Y.png"
-# define CUBE_MAP_PZ "texture/TXR_ENV_Skybox_Cloud Layers__Cam_0_Front+Z.png"
-# define CUBE_MAP_NZ "texture/TXR_ENV_Skybox_Cloud Layers__Cam_1_Back-Z.png"
 
 # define DEFAULT_TEXTURE "texture/test.jpeg"
 
@@ -100,7 +94,7 @@ struct s_mesh {
 typedef struct s_mesh t_mesh;
 
 struct s_texture {
-    unsigned char   *data;       
+    void   *data;       
     int             x;
     int             y;
     int             numColCh;
@@ -151,7 +145,7 @@ struct s_textureInfo {
 typedef struct s_textureInfo t_textureInfo;
 
 struct s_textureLoader {
-    t_textureInfo   cubeMap[6];
+    t_textureInfo   cubeMap;
     t_textureInfo   *object;
     char            **texturesName;
     GLuint          segmentNb;
@@ -204,6 +198,7 @@ void mainLoop(t_scop *scop);
 //  cubeMap.c
 int initBackground(t_scop *scop);
 void *loadCubeMap(void *data);
+GLuint createCubeMapFromEquirectangular(t_texture texture, char *path, GLuint cubeVAO);
 
 // textureLoading.c
 void bindAllTextures(t_scop *scop);

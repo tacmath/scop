@@ -43,7 +43,7 @@ int main(int ac, char **av) {
         !loadAllTextures(&scop))
         return (-1);
     freeMeshData(&scop.object.mesh);
-    perspective(45.0f, (float)(WINDOW_WIDTH/WINDOW_HEIGHT), 0.1f, 1000.0f, &scop.projection);
+    perspective(45.0f, (float)(WINDOW_WIDTH/WINDOW_HEIGHT), 0.1f, 200.0f, &scop.projection);
     mat4SetIdentity(&scop.rotation);
     ObjectSize = scop.object.mesh.max.y - scop.object.mesh.min.y;
     scop.lightPos = (t_vertex){scop.object.mesh.min.x * 1.5, ((scop.object.mesh.max.y - scop.object.mesh.min.y) / 2) * 1.5 - scop.object.mesh.min.y, (scop.object.mesh.max.z - scop.object.mesh.min.z) / 2 - scop.object.mesh.min.z};

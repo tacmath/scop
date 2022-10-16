@@ -22,16 +22,13 @@ GLuint textureInit(t_texture texture) {
 void bindCubeMap(t_scop *scop) {
     t_texture texture;
 
-    glBindTexture(GL_TEXTURE_CUBE_MAP, scop->background.textureID);
-    for (int n = 0; n < 6; n++) {
-        if (scop->textures.cubeMap[n].status == LOADED) {
-            texture = scop->textures.cubeMap[n].texture;
-            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + n, 0, GL_RGB, texture.x, texture.y, 0, GL_RGB, GL_UNSIGNED_BYTE, texture.data);
-            scop->textures.cubeMap[n].status = 0;
-            scop->textures.texturesLeft -= 1;
-        //    dprintf(1, "new texture loaded\n");
-            stbi_image_free(texture.data);   
-        }
+    if (scop->textures.cubeMap.status == LOADED) {
+        texture = scop->textures.cubeMap.texture;
+        scop->background.textureID = createCubeMapFromEquirectangular(texture, scop->path, scop->background.VAO);
+        scop->textures.cubeMap.status = 0;
+        scop->textures.texturesLeft -= 1;
+    //    dprintf(1, "new texture loaded\n");
+        stbi_image_free(texture.data);   
     }
 }
 
@@ -78,33 +75,21 @@ void bindAllTextures(t_scop *scop) {
 }
 
 void *loadCubeMap(void *data) {
-    char **texturesName;
+    char *texturesName;
     t_texture texture;
     t_scop *scop;
 
     scop = data;
-    if (!(texturesName = malloc(sizeof(char*) * 6)))
-        return (0);
 
-    texturesName[0] = ft_strjoin(scop->path, CUBE_MAP_PX);
-    texturesName[1] = ft_strjoin(scop->path, CUBE_MAP_NX);
-    texturesName[2] = ft_strjoin(scop->path, CUBE_MAP_PY);
-    texturesName[3] = ft_strjoin(scop->path, CUBE_MAP_NY);
-    texturesName[4] = ft_strjoin(scop->path, CUBE_MAP_PZ);
-    texturesName[5] = ft_strjoin(scop->path, CUBE_MAP_NZ);
-    
+    texturesName = ft_strjoin(scop->path, CUBE_MAP_FILE);
     stbi_set_flip_vertically_on_load_thread(0);
-    for (int n = 0; n < 6; n++) {
-        texture.data = stbi_load(texturesName[n], &texture.x, &texture.y, &texture.numColCh, 0);
-        if (!texture.data)
-            dprintf(2, "Failed to load %s\n", texturesName[n]);
-        scop->textures.texturesLeft += 1;
-        scop->textures.cubeMap[n].texture = texture;
-        scop->textures.cubeMap[n].status = LOADED;
+    texture.data = stbi_loadf(texturesName, &texture.x, &texture.y, &texture.numColCh, 0);
+    if (!texture.data)
+        dprintf(2, "Failed to load %s\n", texturesName);
+    scop->textures.texturesLeft += 1;
+    scop->textures.cubeMap.texture = texture;
+    scop->textures.cubeMap.status = LOADED;
     //    dprintf(1, "texture %s parsed\n", texturesName[n]);
-    }
-    for (int n = 0; n < 6; n++)
-        free(texturesName[n]);
     free(texturesName);
     return (0);
 }
@@ -142,7 +127,6 @@ void *loadAllTexturesThread(void *data) {
     char    *fileName;
 
     textures = data;
-    stbi_set_flip_vertically_on_load_thread(1);
     for (int n = 0; n < textures->segmentNb; n++) {
         fileName = textures->texturesName[n];
         if (!fileName) {
@@ -170,7 +154,7 @@ int loadAllTextures(t_scop *scop) {
     t_texture texture;
     GLuint textureID;
     
-    stbi_set_flip_vertically_on_load_thread(1);
+    stbi_set_flip_vertically_on_load(1);
     if (scop->option.texture && (defaultTexture = ft_strjoin(scop->path, scop->option.texture))) {
         if (!(texture.data = stbi_load(defaultTexture, &texture.x, &texture.y, &texture.numColCh, 4))) {
             dprintf(2, "Failed to load %s\n", defaultTexture);

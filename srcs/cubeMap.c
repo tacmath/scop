@@ -10,8 +10,85 @@ GLuint cubeMapTexInit(void) {
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	for (unsigned int n = 0; n < 6; ++n) 
+    	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + n, 0, GL_RGB16F, 
+                 CUBE_MAP_RESOLUTION, CUBE_MAP_RESOLUTION, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
     glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
     return (cubeMapId);
+}
+
+void getViewMatrixForCapture(t_mat4 *captureViews) {
+	t_mat4 View = IDENTITY_MAT4;
+
+	mat4Traslate(&View, (t_vertex){0.0f, 0.0f, -2.0f});
+
+	rotate(View, 90.0f, (t_vertex){0.0f, -1.0f, 0.0f}, &captureViews[0]);	//x+
+	rotate(View, 90.0f, (t_vertex){0.0f, 1.0f, 0.0f}, &captureViews[1]);	//x-
+	rotate(View, 90.0f, (t_vertex){-1.0f, 0.0f, 0.0f}, &captureViews[2]);	//y+
+	rotate(View, 90.0f, (t_vertex){1.0f, 0.0f, 0.0f}, &captureViews[3]);	//y-
+	memcpy(captureViews[4], View, sizeof(t_mat4));							//z+
+	rotate(View, 180.0f, (t_vertex){0.0f, 1.0f, 0.0f}, &captureViews[5]);	//z-
+}
+
+GLuint captureCubeMap(GLuint hdrTexture, GLuint programShader, GLuint captureFBO, GLuint cubeVAO) {
+	t_mat4 captureProjection;
+	t_mat4 captureViews[6];
+	GLuint cubeMapId; 
+
+	perspective(90.0f, 1.0f, 0.1f, 10.0f, &captureProjection);
+	cubeMapId = cubeMapTexInit();
+	getViewMatrixForCapture(captureViews);
+
+	glUseProgram(programShader);
+	glUniformMatrix4fv(glGetUniformLocation(programShader, "projection"), 1, GL_TRUE, (GLfloat*)captureProjection);
+	
+	glUniform1i(glGetUniformLocation(programShader, "equirectangularMap"), 0);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, hdrTexture);
+	glBindVertexArray(cubeVAO);
+	glViewport(0, 0, CUBE_MAP_RESOLUTION, CUBE_MAP_RESOLUTION);
+	glEnable(GL_DEPTH_TEST);
+	for (unsigned int n = 0; n < 6; ++n)
+	{
+		glUniformMatrix4fv(glGetUniformLocation(programShader, "view"), 1, GL_TRUE, (GLfloat*)(captureViews[n]));
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, 
+							GL_TEXTURE_CUBE_MAP_POSITIVE_X + n, cubeMapId, 0);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+	}
+	glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+	return (cubeMapId);
+}
+
+GLuint createCubeMapFromEquirectangular(t_texture texture, char *path, GLuint cubeVAO) {
+	GLuint hdrTexture, programShader, captureFBO, captureRBO, cubeMapId;
+
+	if (!texture.data)
+		return (0);
+	glGenTextures(1, &hdrTexture);
+	glBindTexture(GL_TEXTURE_2D, hdrTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, texture.x, texture.y, 0, GL_RGB, GL_FLOAT, texture.data); 
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	if (!(programShader = initShaders("shaders/EquirectangularToCubemapVS", "shaders/EquirectangularToCubemapFS", path)))
+		return (0);
+	glGenFramebuffers(1, &captureFBO);
+	glGenRenderbuffers(1, &captureRBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+	glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, CUBE_MAP_RESOLUTION, CUBE_MAP_RESOLUTION);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO);
+	cubeMapId = captureCubeMap(hdrTexture, programShader, captureFBO, cubeVAO);
+	glDeleteTextures(1, &hdrTexture);
+	glDeleteFramebuffers(1,  &captureFBO);
+	glDeleteRenderbuffers(1, &captureRBO);
+	glDeleteProgram(programShader);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
+	return (cubeMapId);
 }
 
 int initBackground(t_scop *scop) {
@@ -57,7 +134,6 @@ unsigned int skyboxIndices[] =
     initElementArray(scop->background.VAO, (t_array){skyboxIndices, 36});
     if (!(scop->background.programShader = initShaders("shaders/backgroundVS", "shaders/backgroundFS", scop->path)))
         return (0);
-    scop->background.textureID = cubeMapTexInit();
 
     pthread_create(&thread, 0, &loadCubeMap, scop);
     return (1);
