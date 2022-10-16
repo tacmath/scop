@@ -1,12 +1,6 @@
 #include "scop.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h" 
-/*
-    stbi_set_flip_vertically_on_load_thread(1);
-    if (!(texture.data = stbi_load(fileName, &texture.x, &texture.y, &texture.numColCh, 4))) {
-        dprintf(2, "Failed to load %s\n", fileName);
-        return (0);
-    }*/
 
 GLuint textureInit(t_texture texture) {
     GLuint      textureID;
@@ -35,7 +29,7 @@ void bindCubeMap(t_scop *scop) {
             glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + n, 0, GL_RGB, texture.x, texture.y, 0, GL_RGB, GL_UNSIGNED_BYTE, texture.data);
             scop->textures.cubeMap[n].status = 0;
             scop->textures.texturesLeft -= 1;
-            dprintf(1, "new texture loaded\n");
+        //    dprintf(1, "new texture loaded\n");
             stbi_image_free(texture.data);   
         }
     }
@@ -43,56 +37,29 @@ void bindCubeMap(t_scop *scop) {
 
 void enableOptionalTextures(t_scop *scop) {
     glUseProgram(scop->object.programShader);
-    for (int n = 0; n < scop->object.segmentNb; n++) {
-        if (scop->object.segments[n].normalTextureID) {
-            glUniform1i(glGetUniformLocation(scop->object.programShader, "hasNormalMap"), 1);
-            if (scop->object.segments[n].metalTextureID && scop->object.segments[n].routhTextureID)
-                glUniform1i(glGetUniformLocation(scop->object.programShader, "activatePBR"), 1);
-            break ;
-        }
-    }
+    if (scop->object.segments[0].normalTextureID)
+        glUniform1i(glGetUniformLocation(scop->object.programShader, "hasNormalMap"), 1);
+    if (scop->object.segments[0].metalTextureID && scop->object.segments[0].routhTextureID)
+        glUniform1i(glGetUniformLocation(scop->object.programShader, "activatePBR"), 1);
     glUseProgram(0);
-}
-
-void bindTexture(t_scop *scop, t_textureInfo *textureInfo, GLuint textureIndex, GLuint segmentIndex) {
-    if (textureIndex == 0) {
-        if (textureInfo->texture.data)
-            scop->object.segments[segmentIndex].textureID = textureInit(textureInfo->texture);
-        else
-            scop->object.segments[segmentIndex].textureID = scop->textures.defaultTextureID;
-        return ;
-    }
-    if (textureIndex == 1) {
-        scop->object.segments[segmentIndex].normalTextureID = textureInit(textureInfo->texture);
-        return ;
-    }
-    if (textureIndex == 2) {
-        scop->object.segments[segmentIndex].metalTextureID = textureInit(textureInfo->texture);
-        return ;
-    }
-    if (textureIndex == 3) {
-        scop->object.segments[segmentIndex].routhTextureID = textureInit(textureInfo->texture);
-        return ;
-    }
-    if (textureIndex == 4) {
-        scop->object.segments[segmentIndex].AOTextureID = textureInit(textureInfo->texture);
-        return ;
-    }
 }
 
 void bindTextures(t_scop *scop) {
     t_textureInfo *textureInfo;
- //   GLuint *texturesID;
+    GLuint *texturesID;
 
     for (GLuint n = 0; n < scop->object.segmentNb; n++) {
         for (GLuint m = 0; m < TEX_PER_SEGMENT; m++) {
             textureInfo = &(scop->textures.object[n * TEX_PER_SEGMENT + m]);
             if (textureInfo->status == LOADED) {
-              /*  texturesID = (void*)(&(scop->object.segments[n]));*/
-                bindTexture(scop, textureInfo, m, n);
+                texturesID = (void*)&scop->object.segments[n];
+                if (textureInfo->texture.data)
+                    texturesID[m] = textureInit(textureInfo->texture);
+                else if (m == 0)
+                    texturesID[0] = scop->textures.defaultTextureID;
                 textureInfo->status = 0;
                 scop->textures.texturesLeft -= TEX_OBJECT_VALUE;
-                dprintf(1, "new texture loaded\n");
+            //    dprintf(1, "new texture loaded\n");
             }
         }
     }
@@ -134,7 +101,7 @@ void *loadCubeMap(void *data) {
         scop->textures.texturesLeft += 1;
         scop->textures.cubeMap[n].texture = texture;
         scop->textures.cubeMap[n].status = LOADED;
-        dprintf(1, "texture %s parsed\n", texturesName[n]);
+    //    dprintf(1, "texture %s parsed\n", texturesName[n]);
     }
     for (int n = 0; n < 6; n++)
         free(texturesName[n]);
@@ -156,7 +123,7 @@ void loadOptionalTexture(t_textureInfo *textureInfo, unsigned int *texturesLeft,
     textureInfo->texture = texture;
     *texturesLeft += TEX_OBJECT_VALUE;
     textureInfo->status = LOADED;
-    dprintf(2, "texture %s parsed\n", fileName);
+   // dprintf(2, "texture %s parsed\n", fileName);
     free(fileName);
 }
 
@@ -189,7 +156,7 @@ void *loadAllTexturesThread(void *data) {
         textures->texturesLeft += TEX_OBJECT_VALUE;
         textures->object[TEX_PER_SEGMENT * n].texture = texture;
         textures->object[TEX_PER_SEGMENT * n].status = LOADED;
-        dprintf(1, "texture %s parsed\n", fileName);
+    //    dprintf(1, "texture %s parsed\n", fileName);
     }
     loadAllOptionalTextures(textures);
     for (int n = 0; n < textures->segmentNb; n++)

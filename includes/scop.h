@@ -23,7 +23,8 @@
 # define TEX_PER_SEGMENT 5
 # define TEX_OBJECT_VALUE 10
 
-
+# define CUBE_MAP_FILE "cave_entry_in_the_forest.hdr"
+# define CUBE_MAP_RESOLUTION 512
 # define CUBE_MAP_PX "texture/TXR_ENV_Skybox_Cloud Layers__Cam_2_Left+X.png"
 # define CUBE_MAP_NX "texture/TXR_ENV_Skybox_Cloud Layers__Cam_3_Right-X.png"
 # define CUBE_MAP_PY "texture/TXR_ENV_Skybox_Cloud Layers__Cam_4_Up+Y.png"
