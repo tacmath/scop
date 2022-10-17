@@ -85,7 +85,6 @@ void *loadCubeMap(void *data) {
     scop = data;
 
     texturesName = ft_strjoin(scop->path, CUBE_MAP_FILE);
-    stbi_set_flip_vertically_on_load_thread(0);
     texture.data = stbi_loadf(texturesName, &texture.x, &texture.y, &texture.numColCh, 0);
     if (!texture.data)
         dprintf(2, "Failed to load %s\n", texturesName);
