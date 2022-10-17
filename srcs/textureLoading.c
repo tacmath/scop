@@ -24,7 +24,10 @@ void bindCubeMap(t_scop *scop) {
 
     if (scop->textures.cubeMap.status == LOADED) {
         texture = scop->textures.cubeMap.texture;
-        scop->background.textureID = createCubeMapFromEquirectangular(texture, scop->path, scop->background.VAO);
+        scop->background.textureID = createCubeMapFromEquirectangular(texture, scop->path, scop->background.VAO,
+                                                                        &scop->background.irradianceMap);
+        glActiveTexture(GL_TEXTURE5);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, scop->background.irradianceMap);
         scop->textures.cubeMap.status = 0;
         scop->textures.texturesLeft -= 1;
     //    dprintf(1, "new texture loaded\n");

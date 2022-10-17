@@ -23,8 +23,11 @@
 # define TEX_PER_SEGMENT 5
 # define TEX_OBJECT_VALUE 10
 
-# define CUBE_MAP_FILE "texture/newport_loft.hdr"//"texture/panorama_map.hdr"//"texture/cave_entry_in_the_forest.hdr"//
+  //  faire une option pour changer le background
+# define CUBE_MAP_FILE "texture/newport_loft.hdr"//"texture/cave.hdr"//"texture/panorama_map.hdr"//"texture/cave_entry_in_the_forest.hdr"//
 # define CUBE_MAP_RESOLUTION 512
+//# define IRRADIANCE_MAP
+# define IRRADIANCE_MAP_RESOLUTION 16
 
 # define DEFAULT_TEXTURE "texture/test.jpeg"
 
@@ -127,6 +130,7 @@ struct s_background {
     GLuint  VAO;
     GLuint  textureID;
     GLuint  programShader;
+    GLuint  irradianceMap;
 };
 
 typedef struct s_background t_background;
@@ -198,7 +202,7 @@ void mainLoop(t_scop *scop);
 //  cubeMap.c
 int initBackground(t_scop *scop);
 void *loadCubeMap(void *data);
-GLuint createCubeMapFromEquirectangular(t_texture texture, char *path, GLuint cubeVAO);
+GLuint createCubeMapFromEquirectangular(t_texture texture, char *path, GLuint cubeVAO, GLuint *irradianceMap);
 
 // textureLoading.c
 void bindAllTextures(t_scop *scop);

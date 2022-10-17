@@ -1,6 +1,6 @@
 #include "scop.h"
 
-GLuint cubeMapTexInit(void) {
+GLuint cubeMapTexInit(GLuint resolution) {
     GLuint cubeMapId;
 
     glGenTextures(1, &cubeMapId);
@@ -12,7 +12,7 @@ GLuint cubeMapTexInit(void) {
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 	for (unsigned int n = 0; n < 6; ++n) 
     	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + n, 0, GL_RGB16F, 
-                 CUBE_MAP_RESOLUTION, CUBE_MAP_RESOLUTION, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+                 resolution, resolution, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
     glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
     return (cubeMapId);
 }
@@ -30,27 +30,16 @@ void getViewMatrixForCapture(t_mat4 *captureViews) {
 	rotate(View, 180.0f, (t_vertex){0.0f, 1.0f, 0.0f}, &captureViews[5]);	//z-
 }
 
-GLuint captureCubeMap(GLuint hdrTexture, GLuint programShader, GLuint captureFBO, GLuint cubeVAO) {
-	t_mat4 captureProjection;
+GLuint captureCubeMapFromRender(GLuint cubeMapId, GLuint viewLoc, GLuint resolution) {
 	t_mat4 captureViews[6];
-	GLuint cubeMapId; 
 
-	perspective(90.0f, 1.0f, 0.1f, 10.0f, &captureProjection);
-	cubeMapId = cubeMapTexInit();
 	getViewMatrixForCapture(captureViews);
 
-	glUseProgram(programShader);
-	glUniformMatrix4fv(glGetUniformLocation(programShader, "projection"), 1, GL_TRUE, (GLfloat*)captureProjection);
-	
-	glUniform1i(glGetUniformLocation(programShader, "equirectangularMap"), 0);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, hdrTexture);
-	glBindVertexArray(cubeVAO);
-	glViewport(0, 0, CUBE_MAP_RESOLUTION, CUBE_MAP_RESOLUTION);
+	glViewport(0, 0, resolution, resolution);
 	glEnable(GL_DEPTH_TEST);
 	for (unsigned int n = 0; n < 6; ++n)
 	{
-		glUniformMatrix4fv(glGetUniformLocation(programShader, "view"), 1, GL_TRUE, (GLfloat*)(captureViews[n]));
+		glUniformMatrix4fv(viewLoc, 1, GL_TRUE, (GLfloat*)(captureViews[n]));
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, 
 							GL_TEXTURE_CUBE_MAP_POSITIVE_X + n, cubeMapId, 0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -60,8 +49,50 @@ GLuint captureCubeMap(GLuint hdrTexture, GLuint programShader, GLuint captureFBO
 	return (cubeMapId);
 }
 
-GLuint createCubeMapFromEquirectangular(t_texture texture, char *path, GLuint cubeVAO) {
-	GLuint hdrTexture, programShader, captureFBO, captureRBO, cubeMapId;
+GLuint generateSkyBoxFromEquirectangular(GLuint hdrTexture, char *path, GLuint cubeVAO) {
+	t_mat4 captureProjection;
+	GLuint cubeMapId, programShader; 
+
+	if (!(programShader = initShaders("shaders/basicVS.glsl", "shaders/EquirectangularToCubemapFS.glsl", path)))
+		return (0);
+	cubeMapId = cubeMapTexInit(CUBE_MAP_RESOLUTION);
+
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, CUBE_MAP_RESOLUTION, CUBE_MAP_RESOLUTION);
+	perspective(90.0f, 1.0f, 0.1f, 10.0f, &captureProjection);
+	glBindVertexArray(cubeVAO);
+	glUseProgram(programShader);
+	glUniformMatrix4fv(glGetUniformLocation(programShader, "projection"), 1, GL_TRUE, (GLfloat*)captureProjection);
+	glUniform1i(glGetUniformLocation(programShader, "equirectangularMap"), 0);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, hdrTexture);
+	captureCubeMapFromRender(cubeMapId, glGetUniformLocation(programShader, "view"), CUBE_MAP_RESOLUTION);
+	glDeleteProgram(programShader);
+	return (cubeMapId);
+}
+
+GLuint generateIrradianceFromSkyBox(GLuint skybox, char *path, GLuint cubeVAO) {
+	t_mat4 captureProjection;
+	GLuint cubeMapId, programShader; 
+
+	if (!(programShader = initShaders("shaders/basicVS.glsl", "shaders/irradianceFS.glsl", path)))
+		return (0);
+	cubeMapId = cubeMapTexInit(IRRADIANCE_MAP_RESOLUTION);
+
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, IRRADIANCE_MAP_RESOLUTION, IRRADIANCE_MAP_RESOLUTION);
+	perspective(90.0f, 1.0f, 0.1f, 10.0f, &captureProjection);
+	glBindVertexArray(cubeVAO);
+	glUseProgram(programShader);
+	glUniformMatrix4fv(glGetUniformLocation(programShader, "projection"), 1, GL_TRUE, (GLfloat*)captureProjection);
+	glUniform1i(glGetUniformLocation(programShader, "skybox"), 0);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, skybox);
+	captureCubeMapFromRender(cubeMapId, glGetUniformLocation(programShader, "view"), IRRADIANCE_MAP_RESOLUTION);
+	glDeleteProgram(programShader);
+	return (cubeMapId);
+}
+
+GLuint createCubeMapFromEquirectangular(t_texture texture, char *path, GLuint cubeVAO, GLuint *irradianceMap) {
+	GLuint hdrTexture, cubeMapId, captureFBO, captureRBO;
 
 	if (!texture.data)
 		return (0);
@@ -73,19 +104,21 @@ GLuint createCubeMapFromEquirectangular(t_texture texture, char *path, GLuint cu
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	if (!(programShader = initShaders("shaders/EquirectangularToCubemapVS", "shaders/EquirectangularToCubemapFS", path)))
-		return (0);
+	
 	glGenFramebuffers(1, &captureFBO);
 	glGenRenderbuffers(1, &captureRBO);
 	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
 	glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, CUBE_MAP_RESOLUTION, CUBE_MAP_RESOLUTION);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO);
-	cubeMapId = captureCubeMap(hdrTexture, programShader, captureFBO, cubeVAO);
-	glDeleteTextures(1, &hdrTexture);
+
+	cubeMapId = generateSkyBoxFromEquirectangular(hdrTexture, path, cubeVAO);
+#ifdef IRRADIANCE_MAP
+	*irradianceMap = generateIrradianceFromSkyBox(cubeMapId, path, cubeVAO);
+#endif
+
 	glDeleteFramebuffers(1,  &captureFBO);
 	glDeleteRenderbuffers(1, &captureRBO);
-	glDeleteProgram(programShader);
+	glDeleteTextures(1, &hdrTexture);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glBindRenderbuffer(GL_RENDERBUFFER, 0);
 	return (cubeMapId);
@@ -132,7 +165,7 @@ unsigned int skyboxIndices[] =
 
     scop->background.VAO = initVertexArray((t_array){skyboxVertices, 8});
     initElementArray(scop->background.VAO, (t_array){skyboxIndices, 36});
-    if (!(scop->background.programShader = initShaders("shaders/backgroundVS", "shaders/backgroundFS", scop->path)))
+    if (!(scop->background.programShader = initShaders("shaders/skyBoxVS.glsl", "shaders/skyBoxFS.glsl", scop->path)))
         return (0);
 
     pthread_create(&thread, 0, &loadCubeMap, scop);

@@ -12,14 +12,14 @@ int generateVAO(t_scop  *scop) {
         return (0);
     
     if (scop->object.mesh.indices.size) {
-        if (!(scop->object.programShader = initShaders("shaders/vertexShader", "shaders/fragmentShader", scop->path)))
+        if (!(scop->object.programShader = initShaders("shaders/vertexShader.glsl", "shaders/fragmentShader.glsl", scop->path)))
             return (0);
         scop->object.segments[0].VAO = initVertexArray(scop->object.mesh.vertices);
         initElementArray(scop->object.segments[0].VAO, scop->object.mesh.indices);
         scop->object.segmentNb = 1;
         return (1);
     }
-    if (!(scop->object.programShader = initShaders("shaders/completeVS", "shaders/completeFS", scop->path)))
+    if (!(scop->object.programShader = initShaders("shaders/completeVS.glsl", "shaders/completeFS.glsl", scop->path)))
         return (0);
     for (int n = 0; n < scop->object.segmentNb; n++) {
         segment.data = scop->object.mesh.vertices.data + scop->object.mesh.segments[n].start * sizeof(t_vertex);
