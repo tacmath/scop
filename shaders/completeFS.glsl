@@ -20,7 +20,7 @@ uniform sampler2D NormalMap;
 uniform sampler2D MetalMap;
 uniform sampler2D RouthnessMap;
 uniform sampler2D AOMap;
-uniform samplerCube irradianceMap;
+//uniform samplerCube irradianceMap;
 
 float GeometrySmith(float NdotV, float NdotL, float k)
 {
