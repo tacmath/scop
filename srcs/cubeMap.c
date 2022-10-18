@@ -21,21 +21,20 @@ void getViewMatrixForCapture(t_mat4 *captureViews) {
 	t_mat4 View = IDENTITY_MAT4;
 	t_mat4 tmp;
 
-	mat4Traslate(&View, (t_vertex){0.0f, 0.0f, -2.0f});
+	mat4Traslate(&View, (t_vertex){0.0f, 0.0f, -2.0f});	//changer les matrices pour que l'irradiance marche
+														//toujours pas bon faire des test avec lookat
 
-	rotate(View, 90.0f, (t_vertex){0.0f, -1.0f, 0.0f}, &tmp);				//x+			//changer les matrices pour que l'irradiance marche
+	rotate(View, 90.0f, (t_vertex){0.0f, 1.0f, 0.0f}, &tmp);				//x+			
 	rotate(tmp, 180.0f, (t_vertex){0.0f, 0.0f, 1.0f}, &captureViews[0]);	//x+
-	rotate(View, 90.0f, (t_vertex){0.0f, 1.0f, 0.0f}, &tmp);				//x-
+	rotate(View, 90.0f, (t_vertex){0.0f, -1.0f, 0.0f}, &tmp);				//x-
 	rotate(tmp, 180.0f, (t_vertex){0.0f, 0.0f, 1.0f}, &captureViews[1]);	//x-
 
-	rotate(View, 90.0f, (t_vertex){1.0f, 0.0f, 0.0f}, &tmp);	//y+
-	rotate(tmp, 180.0f, (t_vertex){0.0f, 1.0f, 0.0f}, &captureViews[2]);	//y+
-	rotate(View, 90.0f, (t_vertex){-1.0f, 0.0f, 0.0f}, &tmp);	//y-
-	rotate(tmp, 180.0f, (t_vertex){0.0f, 1.0f, 0.0f}, &captureViews[3]);	//y-
+	rotate(View, 90.0f, (t_vertex){1.0f, 0.0f, 0.0f}, &captureViews[2]);	//y+
+	rotate(View, 90.0f, (t_vertex){-1.0f, 0.0f, 0.0f}, &captureViews[3]);	//y-
 
-	memcpy(tmp, View, sizeof(t_mat4));										//z+
+	rotate(View, 180.0f, (t_vertex){0.0f, 1.0f, 0.0f}, &tmp);				//z+
 	rotate(tmp, 180.0f, (t_vertex){0.0f, 0.0f, 1.0f}, &captureViews[4]);	//z+
-	rotate(View, 180.0f, (t_vertex){0.0f, 1.0f, 0.0f}, &tmp);				//z-
+	memcpy(tmp, View, sizeof(t_mat4));										//z-
 	rotate(tmp, 180.0f, (t_vertex){0.0f, 0.0f, 1.0f}, &captureViews[5]);	//z-
 }
 
