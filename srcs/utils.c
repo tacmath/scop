@@ -34,6 +34,7 @@ void printUsage() {
     printf("Usage  : ./scop [OPTION]... FILE.obj\n\n");
     printf("option :\n");
     printf("  -t  TEXTURE_FILE\n");
+    printf("  -b  BACKGROUND_TEXTURE_FILE\n");
 }
 
 void freeMeshData(t_mesh *mesh) {
