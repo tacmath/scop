@@ -119,21 +119,15 @@ void main()
   
 
         F = fresnelSchlickRoughness(NdotV, F0, roughness);
+        kD = (1.0 - F) * (1.0 - metallic);
+        vec3 diffuse    = texture(irradianceMap, normal).rgb * kD * Color;
 
-        kD = 1.0 - F;
-        kD *= 1.0 - metallic;	  
-        
-        vec3 irradiance = texture(irradianceMap, normal).rgb;
-        vec3 diffuse    = irradiance * Color;
-
-        vec3 R = reflect(-V, normal); 
-        
         const float MAX_REFLECTION_LOD = 4.0;
-        vec3 prefilteredColor = textureLod(prefilterMap, R,  roughness * MAX_REFLECTION_LOD).rgb;   
+        vec3 prefilteredColor = textureLod(prefilterMap, reflect(-V, normal),  roughness * MAX_REFLECTION_LOD).rgb;   
         vec2 envBRDF  = texture(brdfLUT, vec2(NdotV, roughness)).rg;
         specular = prefilteredColor * (F * envBRDF.x + envBRDF.y);
         
-        vec3 ambient = (kD * diffuse + specular) * ao;
+        vec3 ambient = (diffuse + specular) * ao;
 
         vec3 color = ambient;// + Lo;
 

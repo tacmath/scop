@@ -12,6 +12,7 @@ int parseArguments(int ac, char **av, t_scop  *scop) {
         return (0);
     }
     scop->option.texture = getOption("-t", ac, av, objectFile);
+    scop->option.background = getOption("-b", ac, av, objectFile);
     return (1);
 }
 

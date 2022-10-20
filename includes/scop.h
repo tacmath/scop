@@ -138,6 +138,7 @@ typedef struct s_background t_background;
 
 struct s_option {
     char        *texture;
+    char        *background;
 };
 
 typedef struct s_option t_option;
