@@ -14,8 +14,9 @@ char *getShaderSource(char *fileName) {
     }
     fileLength = lseek(fd, 0, SEEK_END);
     lseek(fd, 0, SEEK_SET);
-    if (!(source = calloc(sizeof(char), fileLength + 1)))
+    if (!(source = malloc(sizeof(char) * (fileLength + 1))))
         return (0);
+    source[fileLength] = 0;
     read(fd, source, fileLength);
     close(fd);
     return (source);

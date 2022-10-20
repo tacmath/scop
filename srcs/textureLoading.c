@@ -5,6 +5,7 @@
 GLuint textureInit(t_texture texture) {
     GLuint      textureID;
 
+    glActiveTexture(GL_TEXTURE0);
     glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_2D, textureID);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -21,13 +22,19 @@ GLuint textureInit(t_texture texture) {
 
 void bindCubeMap(t_scop *scop) {
     t_texture texture;
+    GLuint      prefilled, brdf;
 
     if (scop->textures.cubeMap.status == LOADED) {
         texture = scop->textures.cubeMap.texture;
         scop->background.textureID = createCubeMapFromEquirectangular(texture, scop->path, scop->background.VAO,
-                                                                        &scop->background.irradianceMap);
+                                                                        &scop->background.irradianceMap, &prefilled, &brdf);
+        glUseProgram(scop->object.programShader);
         glActiveTexture(GL_TEXTURE5);
         glBindTexture(GL_TEXTURE_CUBE_MAP, scop->background.irradianceMap);
+        glActiveTexture(GL_TEXTURE6);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, prefilled);
+        glActiveTexture(GL_TEXTURE7);
+        glBindTexture(GL_TEXTURE_2D, brdf);
         scop->textures.cubeMap.status = 0;
         scop->textures.texturesLeft -= 1;
     //    dprintf(1, "new texture loaded\n");

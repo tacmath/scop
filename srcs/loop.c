@@ -22,6 +22,8 @@ static void initUniforms(t_scop *scop) {
     glUniform1i(glGetUniformLocation(scop->object.programShader, "RouthnessMap"), 3);
     glUniform1i(glGetUniformLocation(scop->object.programShader, "AOMap"), 4);
     glUniform1i(glGetUniformLocation(scop->object.programShader, "irradianceMap"), 5);
+    glUniform1i(glGetUniformLocation(scop->object.programShader, "prefilterMap"), 6);
+    glUniform1i(glGetUniformLocation(scop->object.programShader, "brdfLUT"), 7);
 }
 
 void setModelMatrix(t_scop *scop, GLuint matrixLoc) {

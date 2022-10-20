@@ -20,7 +20,9 @@ uniform sampler2D NormalMap;
 uniform sampler2D MetalMap;
 uniform sampler2D RouthnessMap;
 uniform sampler2D AOMap;
-//uniform samplerCube irradianceMap;
+uniform samplerCube irradianceMap;
+uniform samplerCube prefilterMap;
+uniform sampler2D brdfLUT;
 
 float GeometrySmith(float NdotV, float NdotL, float k)
 {
@@ -43,10 +45,15 @@ float DistributionGGX(vec3 N, vec3 H, float a)
     return nom / max(denom, 0.0000001);
 }
 
-vec3 fresnelSchlick(float cosTheta, vec3 baseReflectivity)
+vec3 fresnelSchlick(float cosTheta, vec3 F0)
 {
-    return baseReflectivity + (1.0 - baseReflectivity) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+    return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
+
+vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
+{
+    return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+}   
 
 void main()
 {
@@ -78,7 +85,11 @@ void main()
         float ao = texture(AOMap, texCoord).r;
 
         vec3 Lo = vec3(0.0f);
-        vec3 baseReflectivity = mix(vec3(0.04), Color, roughness);
+
+        // calculate reflectance at normal incidence; if dia-electric (like plastic) use F0 
+        // of 0.04 and if it's a metal, use the albedo color as F0 (metallic workflow)    
+        vec3 F0 = Color; 
+        F0 = mix(F0, Color, metallic);
 
         vec3 V = normalize(cameraPos - currentPos);
         float NdotV = max(dot(normal, V), 0.0000001f);
@@ -94,7 +105,7 @@ void main()
 
         float D = DistributionGGX(normal, H, roughness);
         float G = GeometrySmith(NdotV, NdotL, roughness);
-        vec3 F = fresnelSchlick(max(dot(H, V), 0.0f), baseReflectivity);
+        vec3 F = fresnelSchlick(max(dot(H, V), 0.0f), F0);
 
         vec3 specular = (D * G * F) / (4.0f * NdotV * NdotL);
 
@@ -105,15 +116,26 @@ void main()
         Lo += (kD * Color / PI + specular) * radiance * NdotL;
 
         // end of per light calcul
+  
 
-        /*vec3 kS = fresnelSchlick(NdotV, baseReflectivity);
-        kD = 1.0 - kS;
+        F = fresnelSchlickRoughness(NdotV, F0, roughness);
+
+        kD = 1.0 - F;
         kD *= 1.0 - metallic;	  
+        
         vec3 irradiance = texture(irradianceMap, normal).rgb;
-        vec3 diffuse    = irradiance * Color;*/
-        vec3 ambient = /*(kD * diffuse)*/ vec3(0.3) * Color * ao;
+        vec3 diffuse    = irradiance * Color;
 
-        vec3 color = ambient + Lo;
+        vec3 R = reflect(-V, normal); 
+        
+        const float MAX_REFLECTION_LOD = 4.0;
+        vec3 prefilteredColor = textureLod(prefilterMap, R,  roughness * MAX_REFLECTION_LOD).rgb;   
+        vec2 envBRDF  = texture(brdfLUT, vec2(NdotV, roughness)).rg;
+        specular = prefilteredColor * (F * envBRDF.x + envBRDF.y);
+        
+        vec3 ambient = (kD * diffuse + specular) * ao;
+
+        vec3 color = ambient;// + Lo;
 
     //    color = color / (color + vec3(1.0f)); //tonemapping
 

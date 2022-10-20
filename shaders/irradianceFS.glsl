@@ -1,6 +1,6 @@
 #version 330 core
 out vec4 FragColor;
-in vec3 localPos;
+in vec3 WorldPos;
 
 uniform samplerCube skybox;
 
@@ -9,7 +9,7 @@ const float PI = 3.14159265359;
 void main()
 {		
     // the sample direction equals the hemisphere's orientation 
-    vec3 normal = normalize(localPos);
+    vec3 normal = normalize(WorldPos);
   
     vec3 irradiance = vec3(0.0);
 

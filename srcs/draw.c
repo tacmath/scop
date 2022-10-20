@@ -2,10 +2,9 @@
 
 void drawBackground(t_scop *scop) {
     glDepthFunc(GL_LEQUAL);
-    glUseProgram(scop->background.programShader);
-    glBindVertexArray(scop->background.VAO);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_CUBE_MAP, scop->background.textureID);
+    glBindVertexArray(scop->background.VAO);
     glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
     glDepthFunc(GL_LESS);
 }
