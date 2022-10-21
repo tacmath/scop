@@ -15,15 +15,30 @@ void getNormalKeyEvent(t_scop *scop) {
         keyStatusN = 1;
 }
 
+void getLightKeyEvent(t_scop *scop) {
+    static char keyStatus = 1;
+    static char light = 0;
+    int status;
+
+    status = glfwGetKey(scop->window, GLFW_KEY_L);
+    if (status == GLFW_PRESS && keyStatus) {
+        light = !light;
+        glUniform1i(glGetUniformLocation(scop->object.programShader, "hasLights"), light);
+        keyStatus = 0;
+    }
+    else if (status == GLFW_RELEASE)
+        keyStatus = 1;
+}
+
 void getPBRKeyEvent(t_scop *scop) {
     static char keyStatus = 1;
-    static char normalMap = 1;
+    static char pbr = 1;
     int status;
 
     status = glfwGetKey(scop->window, GLFW_KEY_P);
     if (status == GLFW_PRESS && keyStatus) {
-        normalMap = !normalMap;
-        glUniform1i(glGetUniformLocation(scop->object.programShader, "activatePBR"), normalMap);
+        pbr = !pbr;
+        glUniform1i(glGetUniformLocation(scop->object.programShader, "activatePBR"), pbr);
         keyStatus = 0;
     }
     else if (status == GLFW_RELEASE)
@@ -80,5 +95,6 @@ void getEvents(t_scop *scop) {
     getMouseEvent(scop);
     getNormalKeyEvent(scop);
     getPBRKeyEvent(scop);
+    getLightKeyEvent(scop);
     getTransitionKeyEvent(scop);
 }
