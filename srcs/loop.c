@@ -76,6 +76,8 @@ void mainLoop(t_scop *scop) {
 
     initUniforms(scop);
     glEnable(GL_DEPTH_TEST);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);
     while ( glfwGetKey(scop->window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
             glfwWindowShouldClose(scop->window) == 0 ) {
         glClear(GL_DEPTH_BUFFER_BIT);
@@ -85,6 +87,6 @@ void mainLoop(t_scop *scop) {
         drawObject(scop, modelMatrixLoc);
 		glfwSwapBuffers(scop->window);
         getEvents(scop);
-        limitFPS();
+        limitFPS(scop->window);
     }
 }

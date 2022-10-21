@@ -197,11 +197,13 @@ GLuint generateBRDFtexture(char *path) {
 }
 
 
-GLuint createCubeMapFromEquirectangular(t_texture texture, char *path, GLuint cubeVAO, GLuint *irradianceMap, GLuint *prefilled, GLuint *brdf) {
-	GLuint hdrTexture, cubeMapId, captureFBO, captureRBO;
+t_cubeMapTextures createCubeMapFromEquirectangular(t_texture texture, char *path, GLuint cubeVAO, char IBL) {
+	GLuint hdrTexture, captureFBO, captureRBO;
+	t_cubeMapTextures cubeMapTextures;
 
+	bzero(&cubeMapTextures, sizeof(t_cubeMapTextures));
 	if (!texture.data)
-		return (0);
+		return (cubeMapTextures);
 	glActiveTexture(GL_TEXTURE0);
 	glGenTextures(1, &hdrTexture);
 	glBindTexture(GL_TEXTURE_2D, hdrTexture);
@@ -218,20 +220,19 @@ GLuint createCubeMapFromEquirectangular(t_texture texture, char *path, GLuint cu
 	glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO);
 
-	cubeMapId = generateSkyBoxFromEquirectangular(hdrTexture, path, cubeVAO);
-#ifdef IRRADIANCE_MAP
-	*irradianceMap = generateIrradianceFromSkyBox(cubeMapId, path, cubeVAO);
-#endif
-	*prefilled = generateRoughnessMipmapFromSkyBox(cubeMapId, path, cubeVAO);
-	*brdf = generateBRDFtexture(path);
+	cubeMapTextures.evironementID = generateSkyBoxFromEquirectangular(hdrTexture, path, cubeVAO);
+	if (IBL) {
+		cubeMapTextures.irradianceID = generateIrradianceFromSkyBox(cubeMapTextures.evironementID, path, cubeVAO);
+		cubeMapTextures.prefillerID = generateRoughnessMipmapFromSkyBox(cubeMapTextures.evironementID, path, cubeVAO);
+		cubeMapTextures.brdfID = generateBRDFtexture(path);
+	}
 	
-
-	glDeleteFramebuffers(1,  &captureFBO);
+	glDeleteFramebuffers(1, &captureFBO);
 	glDeleteRenderbuffers(1, &captureRBO);
 	glDeleteTextures(1, &hdrTexture);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glBindRenderbuffer(GL_RENDERBUFFER, 0);
-	return (cubeMapId);
+	return (cubeMapTextures);
 }
 
 int initBackground(t_scop *scop) {

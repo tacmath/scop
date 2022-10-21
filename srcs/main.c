@@ -19,6 +19,7 @@ int generateVAO(t_scop  *scop) {
         scop->object.segmentNb = 1;
         return (1);
     }
+    scop->option.IBL = 1;
     if (!(scop->object.programShader = initShaders("shaders/completeVS.glsl", "shaders/completeFS.glsl", scop->path)))
         return (0);
     for (int n = 0; n < scop->object.segmentNb; n++) {

@@ -45,7 +45,8 @@ void getIndices(FILE *file, t_mesh *mesh) {
     mesh->indices.size += 3;
     if (ret == 4) {
         memcpy(&((t_indice*)mesh->indices.data)[mesh->indices.size], indices, sizeof(t_indice) * 3);
-        ((t_indice*)mesh->indices.data)[mesh->indices.size + 1] = indices[3];
+        ((t_indice*)mesh->indices.data)[mesh->indices.size + 1] = ((t_indice*)mesh->indices.data)[mesh->indices.size];
+        ((t_indice*)mesh->indices.data)[mesh->indices.size] = indices[3];
         mesh->indices.size += 3;
     }
 }

@@ -62,13 +62,25 @@ void freeAll(t_scop *scop) {
     free(scop->textures.object);
 }
 
-void limitFPS() {
+void limitFPS(GLFWwindow *window) {
     static double oldTime = 0;
     static double newTime;
+    static int frames = 0;
+    static char title[40];
+    double timeDiff;
 
     newTime = glfwGetTime();
-    if ((newTime - oldTime) * 1000000 < (1000000.0 / MAX_FPS))
-        usleep((1000000.0 / MAX_FPS) - (newTime - oldTime) * 100000);
-//    printf("delta FPS = %f\n", (1000000.0 / MAX_FPS) - (newTime - oldTime) * 100000);
-    oldTime = glfwGetTime();
+    timeDiff = newTime - oldTime;
+    frames++;
+    if (timeDiff < 1.0f / 30.0f)
+        return ;
+    /*if ((timeDiff * 1000000) / frames < (1000000.0 / MAX_FPS)) {
+        printf("delta FPS = %f\n", (1000000.0 / MAX_FPS) - (timeDiff * 100000) / frames);
+   //     usleep((1000000.0 / MAX_FPS) - (timeDiff * 100000) / frames);
+    }*/
+    sprintf(title, "scop :  FPS = %d  ms = %f", (int)((1.0 / timeDiff) * frames), (timeDiff * 1000) / frames);
+    glfwSetWindowTitle(window, title);
+//    printf("delta FPS = %f\n", (1000000.0 / MAX_FPS) - timeDiff * 100000);
+    frames = 0;
+    oldTime = newTime;
 }

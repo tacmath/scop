@@ -24,6 +24,9 @@ void setSegmentTextures(t_segment *segment) {
 }
 
 void drawObject(t_scop *scop, GLuint modelMatrixLoc) {
+#ifdef FACE_CULLING
+    glEnable(GL_CULL_FACE);
+#endif
     glUseProgram(scop->object.programShader);
     setModelMatrix(scop, modelMatrixLoc);
     for (int n = 0; n < scop->object.segmentNb; n++) {
@@ -34,4 +37,7 @@ void drawObject(t_scop *scop, GLuint modelMatrixLoc) {
         else
             glDrawArrays(GL_TRIANGLES, 0, scop->object.mesh.vertices.size);
     }
+#ifdef FACE_CULLING
+    glDisable(GL_CULL_FACE);
+#endif
 }
