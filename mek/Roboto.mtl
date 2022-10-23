@@ -1,0 +1,45 @@
+newmtl CUBE_phong1SG
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd Cube_normal.tga
+Ni 1.00
+Ks 0.50 0.50 0.50
+Ns 18.00
+newmtl CylinderFBXASC046063SG
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd HAMMER_Base_color.png
+Ni 1.00
+Ks 0.20 0.20 0.20
+Ns 98.00
+newmtl CylinderFBXASC046379SG
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd ARMSLEGS_color_00_Base_color.png
+Ni 1.00
+Ks 0.20 0.20 0.20
+Ns 98.00
+newmtl CylinderFBXASC046400SG
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd GUN_Base_color.png
+Ni 1.00
+Ks 0.20 0.20 0.20
+Ns 98.00
+newmtl SphereFBXASC046049SG
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd BODY_color_01_Base_color.png
+Ni 1.00
+Ks 0.20 0.20 0.20
+Ns 98.00
