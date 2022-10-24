@@ -13,6 +13,7 @@ uniform vec3 lightPos;
 uniform vec3 cameraPos;
 uniform bool activateNormalMap;
 uniform bool activatePBR;
+uniform bool activateIBL;
 uniform bool hasNormalMap;
 uniform bool hasLights;
 
@@ -66,33 +67,43 @@ void main()
     }
     
     vec3 Color = texture(Texture, texCoord).rgb;
+    
+    vec3 Lo = vec3(0.0f);
+    vec3 color;
+    vec3 ambient = 0.2f * Color;
+    vec3 specular;
+    vec3 diffuse;
+    float metallic = 0.6f;
+    float roughness = 0.4f;
+    float ao = 1.0f;
+
+    vec3 V = normalize(cameraPos - currentPos);
+    float NdotV = max(dot(normal, V), 0.0000001f);
+    
 
     if (!activatePBR) {
-        float ambient = 0.2f;
-        vec3 lightDirection = normalize(lightPos - currentPos);
-        float diffuse = max(dot(normal, lightDirection), 0.0f);
-
-        float specularLight = 0.5f;
-        vec3 viewDirection = normalize(cameraPos - currentPos);
-        vec3 reflectionDirection = reflect(-lightDirection, normal);
-        float specAmmunt = pow(max(dot(viewDirection, reflectionDirection), 0.0f), 16);
-        float specular = specAmmunt * specularLight;
+        if (hasLights) {
+            vec3 L = normalize(lightPos - currentPos);
+            diffuse = max(dot(normal, L), 0.0f) * Color;
+            float specularLight = 0.5f;
         
-        FragColor = vec4(Color * (diffuse + ambient + specular), 1.0f);
+            vec3 reflectionDirection = reflect(-L, normal);
+            float specAmmunt = pow(max(dot(V, reflectionDirection), 0.0f), 16);
+            specular = specAmmunt * specularLight * Color;
+            Lo = diffuse + specular;
+        }
     }
     else {
-        float metallic = texture(MetalMap, texCoord).r;
-        float roughness = texture(RouthnessMap, texCoord).r;
-        float ao = texture(AOMap, texCoord).r;
+        metallic = texture(MetalMap, texCoord).r;
+        roughness = texture(RouthnessMap, texCoord).r;
+        ao = texture(AOMap, texCoord).r;
 
         // calculate reflectance at normal incidence; if dia-electric (like plastic) use F0 
         // of 0.04 and if it's a metal, use the albedo color as F0 (metallic workflow)    
         vec3 F0 = Color; 
         F0 = mix(F0, Color, metallic);
 
-        vec3 V = normalize(cameraPos - currentPos);
-        float NdotV = max(dot(normal, V), 0.0000001f);
-        vec3 Lo = vec3(0.0f);
+        Lo = vec3(0.0f);
 
         if (hasLights) {
             // start of per light calcul
@@ -108,7 +119,7 @@ void main()
             float G = GeometrySmith(NdotV, NdotL, roughness);
             vec3 F = fresnelSchlick(max(dot(H, V), 0.0f), F0);
 
-            vec3 specular = (D * G * F) / (4.0f * NdotV * NdotL);
+            specular = (D * G * F) / (4.0f * NdotV * NdotL);
 
             vec3 kD = vec3(1.0f) - F;
 
@@ -116,22 +127,24 @@ void main()
             Lo += (kD * Color / PI + specular) * radiance * NdotL;
             // end of per light calcul
         }
+    }
+
+    if (activateIBL) {
+        vec3 F0 = Color; 
+        F0 = mix(F0, Color, metallic);
 
         vec3 F = fresnelSchlickRoughness(NdotV, F0, roughness);
         vec3 kD = (1.0 - F) * (1.0 - metallic);
-        vec3 diffuse    = texture(irradianceMap, normal).rgb * kD * Color;
+        diffuse    = texture(irradianceMap, normal).rgb * kD * Color;
 
         const float MAX_REFLECTION_LOD = 4.0;
         vec3 prefilteredColor = textureLod(prefilterMap, reflect(-V, normal),  roughness * MAX_REFLECTION_LOD).rgb;   
         vec2 envBRDF  = texture(brdfLUT, vec2(NdotV, roughness)).rg;
-        vec3 specular = prefilteredColor * (F * envBRDF.x + envBRDF.y);
-        
-        vec3 ambient = (diffuse + specular) * ao;
-        vec3 color = ambient + Lo;
+        specular = prefilteredColor * (F * envBRDF.x + envBRDF.y);
 
-    //    color = color / (color + vec3(1.0f)); //tonemapping
-    //    color = pow(color, vec3(1.0f/2.2f));
-
-        FragColor = vec4(color, 1.0f);
+        ambient = (diffuse + specular) * ao;
     }
+    color = ambient + Lo;
+    
+    FragColor = vec4(color, 1.0f);
 }

@@ -45,6 +45,21 @@ void getPBRKeyEvent(t_scop *scop) {
         keyStatus = 1;
 }
 
+void getIBLKeyEvent(t_scop *scop) {
+    static char keyStatus = 1;
+    static char ibl = 1;
+    int status;
+
+    status = glfwGetKey(scop->window, GLFW_KEY_I);
+    if (status == GLFW_PRESS && keyStatus) {
+        ibl = !ibl;
+        glUniform1i(glGetUniformLocation(scop->object.programShader, "activateIBL"), ibl);
+        keyStatus = 0;
+    }
+    else if (status == GLFW_RELEASE)
+        keyStatus = 1;
+}
+
 void getMouseEvent(t_scop *scop) {
     int state;
     double posx, posy;
@@ -95,6 +110,7 @@ void getEvents(t_scop *scop) {
     getMouseEvent(scop);
     getNormalKeyEvent(scop);
     getPBRKeyEvent(scop);
+    getIBLKeyEvent(scop);
     getLightKeyEvent(scop);
     getTransitionKeyEvent(scop);
 }

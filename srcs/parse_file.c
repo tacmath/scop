@@ -93,8 +93,8 @@ void printSegments(t_mesh *mesh) {
     for (int n = 0; n < mesh->segmentNb; n++) {
         dprintf(1, "\nname = %s\n", mesh->segments[n].name);
         dprintf(1, "texture = %s\n", mesh->segments[n].texture);
-        dprintf(1, "start = %d\n", mesh->segments[n].start);
-        dprintf(1, "size = %d\n", mesh->segments[n].size);
+        dprintf(1, "start = %zu\n", mesh->segments[n].start);
+        dprintf(1, "size = %zu\n", mesh->segments[n].size);
     }
 }
 

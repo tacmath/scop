@@ -56,7 +56,6 @@ GLuint captureCubeMapFromRender(GLuint cubeMapId, GLuint viewLoc, GLuint resolut
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 	}
-	glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 	return (cubeMapId);
 }
 
@@ -190,7 +189,6 @@ GLuint generateBRDFtexture(char *path) {
 	glViewport(0, 0, 512, 512);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	renderQuad();
-	glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 
 	glDeleteProgram(programShader);
 	return (brdfLUTTexture);
@@ -226,7 +224,7 @@ t_cubeMapTextures createCubeMapFromEquirectangular(t_texture texture, char *path
 		cubeMapTextures.prefillerID = generateRoughnessMipmapFromSkyBox(cubeMapTextures.evironementID, path, cubeVAO);
 		cubeMapTextures.brdfID = generateBRDFtexture(path);
 	}
-	
+	glViewport(0, 0, WINDOW_WIDTH * PIXEL_PER_WINDOW_PIXEL, WINDOW_HEIGHT * PIXEL_PER_WINDOW_PIXEL);
 	glDeleteFramebuffers(1, &captureFBO);
 	glDeleteRenderbuffers(1, &captureRBO);
 	glDeleteTextures(1, &hdrTexture);

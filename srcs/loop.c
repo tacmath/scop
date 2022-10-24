@@ -16,6 +16,7 @@ static void initUniforms(t_scop *scop) {
     glUniform3fv(glGetUniformLocation(scop->object.programShader, "Omin"), 1, (void*)(&scop->object.mesh.min));
     glUniform3fv(glGetUniformLocation(scop->object.programShader, "lightPos"), 1, (void*)(&scop->lightPos));
     glUniform1i(glGetUniformLocation(scop->object.programShader, "activateNormalMap"), 1);
+    glUniform1i(glGetUniformLocation(scop->object.programShader, "activateIBL"), 1);
     glUniform1i(glGetUniformLocation(scop->object.programShader, "Texture"), 0); 
     glUniform1i(glGetUniformLocation(scop->object.programShader, "NormalMap"), 1);
     glUniform1i(glGetUniformLocation(scop->object.programShader, "MetalMap"), 2); 
@@ -78,6 +79,7 @@ void mainLoop(t_scop *scop) {
     glEnable(GL_DEPTH_TEST);
     glCullFace(GL_BACK);
     glFrontFace(GL_CCW);
+//    glfwSwapInterval(0);
     while ( glfwGetKey(scop->window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
             glfwWindowShouldClose(scop->window) == 0 ) {
         glClear(GL_DEPTH_BUFFER_BIT);
@@ -87,6 +89,6 @@ void mainLoop(t_scop *scop) {
         drawObject(scop, modelMatrixLoc);
 		glfwSwapBuffers(scop->window);
         getEvents(scop);
-        limitFPS(scop->window);
+        showFPS(scop->window);
     }
 }

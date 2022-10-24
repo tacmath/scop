@@ -15,23 +15,30 @@
 #include <GLFW/glfw3.h>
 
 # define   PI           3.14159265358979323846
-# define WINDOW_WIDTH   400.0
-# define WINDOW_HEIGHT  300.0
+# define WINDOW_WIDTH   1700
+# define WINDOW_HEIGHT  1050
+
+#ifdef __APPLE__
+    # define PIXEL_PER_WINDOW_PIXEL 2
+#else
+    # define PIXEL_PER_WINDOW_PIXEL 1
+#endif
+
 # define MAX_FPS        60
 # define LOADED         1
 # define SKYBOX_TEXTURE(x)  x & 7
 # define TEX_PER_SEGMENT 5
 # define TEX_OBJECT_VALUE 10
 
-# define FACE_CULLING
+//# define FACE_CULLING
 
   //  faire une option pour changer le background
 # define CUBE_MAP_FILE "texture/newport_loft.hdr"//"texture/cave.hdr"//"texture/panorama_map.hdr"//"texture/cave_entry_in_the_forest.hdr"//
-# define CUBE_MAP_RESOLUTION 512
+# define CUBE_MAP_RESOLUTION 1024
 # define PEFILLER_RESOLUTION 128
 # define IRRADIANCE_MAP_RESOLUTION 16
 
-# define DEFAULT_TEXTURE "texture/test.jpeg"
+# define DEFAULT_TEXTURE "texture/bois.jpeg"
 
 
 #define IDENTITY_MAT4 {{1.0f,0.0f,0.0f,0.0f},{0.0f,1.0f,0.0f,0.0f},{0.0f,0.0f,1.0f,0.0f},{0.0f,0.0f,0.0f,1.0f}};
@@ -236,7 +243,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void printUsage();
 void freeMeshData(t_mesh *mesh);
 void freeAll(t_scop *scop);
-void limitFPS(GLFWwindow *window);
+void showFPS(GLFWwindow *window);
 
 //  str_utils.c
 char *ft_strjoin(char const *s1, char const *s2);

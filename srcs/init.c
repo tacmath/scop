@@ -51,7 +51,7 @@ GLuint initShaders(char *vertexShaderFile, char *fragmentShaderFile, char *path)
 	glAttachShader(programShader, fragmentShader);
 	glLinkProgram(programShader);
 
-    GLuint status;
+    GLint status;
     glGetProgramiv(programShader, GL_LINK_STATUS, &status);
     if (!status)
         dprintf(2, "program shader failed to link\n");

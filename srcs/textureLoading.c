@@ -157,6 +157,7 @@ void *loadAllTexturesThread(void *data) {
     for (int n = 0; n < textures->segmentNb; n++)
         free(textures->texturesName[n]);
     free(textures->texturesName);
+    return (0);
 }
 
 int loadAllTextures(t_scop *scop) {
