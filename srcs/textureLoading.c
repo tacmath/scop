@@ -46,7 +46,7 @@ void enableOptionalTextures(t_scop *scop) {
     if (scop->object.segments[0].normalTextureID)
         glUniform1i(glGetUniformLocation(scop->object.programShader, "hasNormalMap"), 1);
     if (scop->object.segments[0].metalTextureID && scop->object.segments[0].routhTextureID)
-        glUniform1i(glGetUniformLocation(scop->object.programShader, "activatePBR"), 1);
+        glUniform1i(glGetUniformLocation(scop->object.programShader, "hasPBR"), 1);
     glUseProgram(0);
 }
 

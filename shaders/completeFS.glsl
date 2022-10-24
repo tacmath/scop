@@ -13,6 +13,7 @@ uniform vec3 lightPos;
 uniform vec3 cameraPos;
 uniform bool activateNormalMap;
 uniform bool activatePBR;
+uniform bool hasPBR;
 uniform bool activateIBL;
 uniform bool hasNormalMap;
 uniform bool hasLights;
@@ -70,7 +71,7 @@ void main()
     
     vec3 Lo = vec3(0.0f);
     vec3 color;
-    vec3 ambient = 0.2f * Color;
+    vec3 ambient = 0.3f * Color;
     vec3 specular;
     vec3 diffuse;
     float metallic = 0.6f;
@@ -81,7 +82,7 @@ void main()
     float NdotV = max(dot(normal, V), 0.0000001f);
     
 
-    if (!activatePBR) {
+    if (!activatePBR || !hasPBR) {
         if (hasLights) {
             vec3 L = normalize(lightPos - currentPos);
             diffuse = max(dot(normal, L), 0.0f) * Color;

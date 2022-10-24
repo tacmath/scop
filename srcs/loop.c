@@ -17,6 +17,7 @@ static void initUniforms(t_scop *scop) {
     glUniform3fv(glGetUniformLocation(scop->object.programShader, "lightPos"), 1, (void*)(&scop->lightPos));
     glUniform1i(glGetUniformLocation(scop->object.programShader, "activateNormalMap"), 1);
     glUniform1i(glGetUniformLocation(scop->object.programShader, "activateIBL"), 1);
+    glUniform1i(glGetUniformLocation(scop->object.programShader, "activatePBR"), 1);
     glUniform1i(glGetUniformLocation(scop->object.programShader, "Texture"), 0); 
     glUniform1i(glGetUniformLocation(scop->object.programShader, "NormalMap"), 1);
     glUniform1i(glGetUniformLocation(scop->object.programShader, "MetalMap"), 2); 
