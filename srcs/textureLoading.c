@@ -23,10 +23,13 @@ GLuint textureInit(t_texture texture) {
 void bindCubeMap(t_scop *scop) {
     t_texture texture;
     t_cubeMapTextures cubeMapTextures;
+    int width, height;
 
     if (scop->textures.cubeMap.status == LOADED) {
         texture = scop->textures.cubeMap.texture;
         cubeMapTextures = createCubeMapFromEquirectangular(texture, scop->path, scop->background.VAO, scop->option.IBL);
+        glfwGetFramebufferSize(scop->window, &width, &height);    // reset the viewport
+        glViewport(0, 0, width, height);
         scop->background.textureID = cubeMapTextures.evironementID;
         glActiveTexture(GL_TEXTURE5);
         glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTextures.irradianceID);

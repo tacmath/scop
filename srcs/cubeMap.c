@@ -224,7 +224,6 @@ t_cubeMapTextures createCubeMapFromEquirectangular(t_texture texture, char *path
 		cubeMapTextures.prefillerID = generateRoughnessMipmapFromSkyBox(cubeMapTextures.evironementID, path, cubeVAO);
 		cubeMapTextures.brdfID = generateBRDFtexture(path);
 	}
-	glViewport(0, 0, WINDOW_WIDTH * PIXEL_PER_WINDOW_PIXEL, WINDOW_HEIGHT * PIXEL_PER_WINDOW_PIXEL);
 	glDeleteFramebuffers(1, &captureFBO);
 	glDeleteRenderbuffers(1, &captureRBO);
 	glDeleteTextures(1, &hdrTexture);

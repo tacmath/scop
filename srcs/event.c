@@ -105,9 +105,23 @@ void getTransitionKeyEvent(t_scop *scop) {
     }
 }
 
+void getWindowEvent(t_scop *scop) {
+    static int oldHeight = 0;
+    static int oldWidth = 0;
+    int width, height;
+
+    glfwGetWindowSize(scop->window, &width, &height);
+    if (width != oldWidth || height != oldHeight) {
+        perspective(45.0f, (float)width / (float)height, 0.1f, 200.0f, &scop->projection);
+        oldWidth = width;
+        oldHeight = height;
+    }
+}
+
 void getEvents(t_scop *scop) {
     glfwPollEvents();
     getMouseEvent(scop);
+    getWindowEvent(scop);
     getNormalKeyEvent(scop);
     getPBRKeyEvent(scop);
     getIBLKeyEvent(scop);

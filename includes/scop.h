@@ -18,12 +18,6 @@
 # define WINDOW_WIDTH   1700
 # define WINDOW_HEIGHT  1050
 
-#ifdef __APPLE__
-    # define PIXEL_PER_WINDOW_PIXEL 2
-#else
-    # define PIXEL_PER_WINDOW_PIXEL 1
-#endif
-
 # define MAX_FPS        60
 # define LOADED         1
 # define SKYBOX_TEXTURE(x)  x & 7
@@ -32,7 +26,6 @@
 
 //# define FACE_CULLING
 
-  //  faire une option pour changer le background
 # define CUBE_MAP_FILE "texture/newport_loft.hdr"//"texture/cave.hdr"//"texture/panorama_map.hdr"//"texture/cave_entry_in_the_forest.hdr"//
 # define CUBE_MAP_RESOLUTION 1024
 # define PEFILLER_RESOLUTION 128
