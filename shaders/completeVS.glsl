@@ -20,14 +20,12 @@ void main()
 
    gl_Position = matrix * model * vec4(aPos, 1.0f); //  proj * view * model *
 
- /*  mat3 modelVector = transpose(inverse(mat3(model))); // not needed if model doesn't rotate and doesn't change shape
+  // need to do transpose(inverse(mat3(model))) if the model has non linear scaling
+   mat3 modelVector = mat3(model); // not needed if model doesn't rotate and doesn't change shape
 
    vec3 tangent = normalize(modelVector * aTangent);
    vec3 bitangent = normalize(modelVector * aBitangent);
-   Normal = normalize(modelVector * aNormal);*/
-   vec3 tangent = aTangent;
-   vec3 bitangent = aBitangent;
-   Normal = normalize(aNormal);
+   Normal = normalize(modelVector * aNormal);
    TBN = mat3(tangent, bitangent, Normal);
 
    texCoord = aTex;

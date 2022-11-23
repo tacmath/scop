@@ -123,7 +123,7 @@ struct s_object {
     t_segment   *segments;
     GLuint      segmentNb;
     t_mesh      mesh;
-    t_vertex    rotation;
+    t_mat4      rotation;
     t_vertex    position;
     GLuint      programShader;
 };
@@ -185,6 +185,7 @@ struct s_scop {
     t_textureLoader textures;
     t_mat4      projection;
     t_mat4      rotation;
+    t_vertex    rotationAngle;
     t_vertex    lightPos;
 };
 

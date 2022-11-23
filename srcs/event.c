@@ -35,12 +35,12 @@ static void getMouseEvent(t_scop *scop) {
         t_mat4 tmp;
         float  rotationY;
         
-        scop->object.rotation.y += posx - scop->mouse.x;
-        if (fabs(scop->object.rotation.x + posy - scop->mouse.y) < 90)
-            scop->object.rotation.x += posy - scop->mouse.y;
-        rotationY = scop->object.rotation.y * (PI / 180.0f);
-        rotate(matrix, scop->object.rotation.y, (t_vertex){0.0f, 1.0f, 0.0f}, &tmp);
-        rotate(tmp, scop->object.rotation.x, (t_vertex){cos(rotationY), 0.0f, sin(rotationY)}, &scop->rotation);
+        scop->rotationAngle.y += posx - scop->mouse.x;
+        if (fabs(scop->rotationAngle.x + posy - scop->mouse.y) < 90)
+            scop->rotationAngle.x += posy - scop->mouse.y;
+        rotationY = scop->rotationAngle.y * (PI / 180.0f);
+        rotate(matrix, scop->rotationAngle.y, (t_vertex){0.0f, 1.0f, 0.0f}, &tmp);
+        rotate(tmp, scop->rotationAngle.x, (t_vertex){cos(rotationY), 0.0f, sin(rotationY)}, &scop->rotation);
     }
     scop->mouse.x = posx;
     scop->mouse.y = posy;
@@ -99,9 +99,6 @@ void getWindowEvent(t_scop *scop) {
 }
 
 static void moveObject(t_scop *scop) {
-    int state;
-    double posx, posy;
-
     if (glfwGetKey(scop->window, GLFW_KEY_UP) == GLFW_PRESS)
         scop->object.position.z -= 0.1f;
     if (glfwGetKey(scop->window, GLFW_KEY_DOWN) == GLFW_PRESS)
@@ -116,6 +113,23 @@ static void moveObject(t_scop *scop) {
         scop->object.position.y -= 0.1f;
 }
 
+static void rotateObject(t_scop *scop) {
+    t_mat4 matrix = IDENTITY_MAT4;
+    
+    if (glfwGetKey(scop->window, GLFW_KEY_Y) == GLFW_PRESS) {
+        memcpy(&matrix, &scop->object.rotation, sizeof(t_mat4));
+        rotate(matrix, 1.0f, (t_vertex){0.0f, 1.0f, 0.0f}, &scop->object.rotation);
+    }
+    if (glfwGetKey(scop->window, GLFW_KEY_X) == GLFW_PRESS) {
+        memcpy(&matrix, &scop->object.rotation, sizeof(t_mat4));
+        rotate(matrix, 1.0f, (t_vertex){1.0f, 0.0f, 0.0f}, &scop->object.rotation);
+    }
+    if (glfwGetKey(scop->window, GLFW_KEY_Z) == GLFW_PRESS) {
+        memcpy(&matrix, &scop->object.rotation, sizeof(t_mat4));
+        rotate(matrix, 1.0f, (t_vertex){0.0f, 0.0f, 1.0f}, &scop->object.rotation);
+    }
+}
+
 void initGetKeysEvent() {
     getKeysEvent(0, GLFW_KEY_N, "activateNormalMap", 1);
     getKeysEvent(0, GLFW_KEY_I, "activateIBL", 1);
@@ -128,6 +142,7 @@ void getEvents(t_scop *scop) {
     glfwPollEvents();
     getMouseEvent(scop);
     moveObject(scop);
+    rotateObject(scop);
     getWindowEvent(scop);
     getKeysEvent(scop, GLFW_KEY_N, "activateNormalMap", -1);
     getKeysEvent(scop, GLFW_KEY_I, "activateIBL", -1);
