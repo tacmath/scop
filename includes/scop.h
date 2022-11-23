@@ -124,6 +124,7 @@ struct s_object {
     GLuint      segmentNb;
     t_mesh      mesh;
     t_vertex    rotation;
+    t_vertex    position;
     GLuint      programShader;
 };
 
@@ -210,6 +211,7 @@ t_vec2 vec2sub(t_vec2 v1, t_vec2 v2);
 
 //  loop.c
 
+void setModelMatrix(t_scop *scop);
 void mainLoop(t_scop *scop);
 
 //  cubeMap.c

@@ -21,9 +21,9 @@ void mat4Mult(t_mat4 mat1, t_mat4 mat2, t_mat4 *result) {
 }
 
 void mat4Traslate(t_mat4 *matrice, t_vertex vector) {
-    (*matrice)[0][3] = vector.x;
-    (*matrice)[1][3] = vector.y;
-    (*matrice)[2][3] = vector.z;
+    (*matrice)[0][3] += vector.x;
+    (*matrice)[1][3] += vector.y;
+    (*matrice)[2][3] += vector.z;
 }
 
 t_vertex mat4Vec3Mult(t_mat4 mat, t_vertex vec) {

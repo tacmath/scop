@@ -98,21 +98,42 @@ void getWindowEvent(t_scop *scop) {
     }
 }
 
+static void moveObject(t_scop *scop) {
+    int state;
+    double posx, posy;
+
+    if (glfwGetKey(scop->window, GLFW_KEY_UP) == GLFW_PRESS)
+        scop->object.position.z -= 0.1f;
+    if (glfwGetKey(scop->window, GLFW_KEY_DOWN) == GLFW_PRESS)
+        scop->object.position.z += 0.1f;
+    if (glfwGetKey(scop->window, GLFW_KEY_LEFT) == GLFW_PRESS)
+        scop->object.position.x -= 0.1f;
+    if (glfwGetKey(scop->window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+        scop->object.position.x += 0.1f;
+    if (glfwGetKey(scop->window, GLFW_KEY_SPACE) == GLFW_PRESS)
+        scop->object.position.y += 0.1f;
+    if (glfwGetKey(scop->window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+        scop->object.position.y -= 0.1f;
+}
+
 void initGetKeysEvent() {
     getKeysEvent(0, GLFW_KEY_N, "activateNormalMap", 1);
     getKeysEvent(0, GLFW_KEY_I, "activateIBL", 1);
     getKeysEvent(0, GLFW_KEY_P, "activatePBR", 1);
     getKeysEvent(0, GLFW_KEY_L, "hasLights", 0);
+    getKeysEvent(0, GLFW_KEY_G, "isGray", 0);
 }
 
 void getEvents(t_scop *scop) {
     glfwPollEvents();
     getMouseEvent(scop);
+    moveObject(scop);
     getWindowEvent(scop);
     getKeysEvent(scop, GLFW_KEY_N, "activateNormalMap", -1);
     getKeysEvent(scop, GLFW_KEY_I, "activateIBL", -1);
     getKeysEvent(scop, GLFW_KEY_P, "activatePBR", -1);
     getKeysEvent(scop, GLFW_KEY_L, "hasLights", -1);
+    getKeysEvent(scop, GLFW_KEY_G, "isGray", -1);
     getTransitionKeyEvent(scop);
     getMetalEvent(scop);
 }

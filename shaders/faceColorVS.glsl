@@ -8,6 +8,8 @@ out vec3 pos;
 uniform vec3 Osize;
 uniform vec3 Omin;
 
+uniform bool isGray;
+
 uniform mat4 matrix;
 uniform mat4 model;
 
@@ -16,4 +18,6 @@ void main()
    gl_Position = matrix * model * vec4(aPos, 1.0f); //  proj * view * model *
    pos = aPos;
    color = aColor;
+   if (isGray)
+      color = vec3((aColor.r + aColor.g + aColor.b) / 3.0f);
 }

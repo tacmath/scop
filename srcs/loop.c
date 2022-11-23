@@ -2,13 +2,18 @@
 
 extern float cameraPosZ;
 
-static void setModelMatrix(t_scop *scop, GLuint matrixLoc) {
+void setModelMatrix(t_scop *scop) {
     t_mat4 matrix = IDENTITY_MAT4;
+    static GLuint matrixLoc = 0;
+
+    if (matrixLoc == 0)
+        matrixLoc = glGetUniformLocation(scop->object.programShader, "model");
 
     mat4Traslate(&matrix, (t_vertex){
                 - ((scop->object.mesh.max.x - scop->object.mesh.min.x) / 2) - scop->object.mesh.min.x,
                 - ((scop->object.mesh.max.y - scop->object.mesh.min.y) / 2) - scop->object.mesh.min.y,
                 - ((scop->object.mesh.max.z - scop->object.mesh.min.z) / 2) - scop->object.mesh.min.z});
+    mat4Traslate(&matrix, scop->object.position);
     glUniformMatrix4fv(matrixLoc, 1, GL_TRUE, (GLfloat*)matrix);
 }
 
@@ -22,7 +27,6 @@ static void initUniforms(t_scop *scop) {
     glUniform1i(glGetUniformLocation(scop->background.programShader, "skybox"), 0);
 
     glUseProgram(scop->object.programShader);
-    setModelMatrix(scop, glGetUniformLocation(scop->object.programShader, "model"));
     glUniform3fv(glGetUniformLocation(scop->object.programShader, "Osize")              , 1, (void*)(&objectSize));
     glUniform3fv(glGetUniformLocation(scop->object.programShader, "Omin")               , 1, (void*)(&scop->object.mesh.min));
     glUniform3fv(glGetUniformLocation(scop->object.programShader, "lightPos")           , 1, (void*)(&scop->lightPos));

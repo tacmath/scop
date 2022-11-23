@@ -28,6 +28,7 @@ void drawObject(t_scop *scop) {
     glEnable(GL_CULL_FACE);
 #endif
     glUseProgram(scop->object.programShader);
+    setModelMatrix(scop);
     for (int n = 0; n < scop->object.segmentNb; n++) {
         glBindVertexArray(scop->object.segments[n].VAO);
         setSegmentTextures(&scop->object.segments[n]);
