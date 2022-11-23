@@ -1,66 +1,29 @@
 #include "scop.h"
 
-void getNormalKeyEvent(t_scop *scop) {
-    static char keyStatusN = 1;
-    static char normalMap = 1;
+static void getKeysEvent(t_scop *scop, unsigned char key, char *uniform, char init) {
+    static char keyStatus[128];
+    static char uniformStatus[128];
     int status;
+    
+    if (key >= 128)
+        return ;
+    if (init >= 0) {
+        keyStatus[key] = 1;
+        uniformStatus[key] = (init != 0);
+        return;
+    }
 
-    status = glfwGetKey(scop->window, GLFW_KEY_N);
-    if (status == GLFW_PRESS && keyStatusN) {
-        normalMap = !normalMap;
-        glUniform1i(glGetUniformLocation(scop->object.programShader, "activateNormalMap"), normalMap);
-        keyStatusN = 0;
+    status = glfwGetKey(scop->window, key);
+    if (status == GLFW_PRESS && keyStatus[key]) {
+        uniformStatus[key] = !uniformStatus[key];
+        glUniform1i(glGetUniformLocation(scop->object.programShader, uniform), uniformStatus[key]);
+        keyStatus[key] = 0;
     }
     else if (status == GLFW_RELEASE)
-        keyStatusN = 1;
+        keyStatus[key] = 1;
 }
 
-void getLightKeyEvent(t_scop *scop) {
-    static char keyStatus = 1;
-    static char light = 0;
-    int status;
-
-    status = glfwGetKey(scop->window, GLFW_KEY_L);
-    if (status == GLFW_PRESS && keyStatus) {
-        light = !light;
-        glUniform1i(glGetUniformLocation(scop->object.programShader, "hasLights"), light);
-        keyStatus = 0;
-    }
-    else if (status == GLFW_RELEASE)
-        keyStatus = 1;
-}
-
-void getPBRKeyEvent(t_scop *scop) {
-    static char keyStatus = 1;
-    static char pbr = 1;
-    int status;
-
-    status = glfwGetKey(scop->window, GLFW_KEY_P);
-    if (status == GLFW_PRESS && keyStatus) {
-        pbr = !pbr;
-        glUniform1i(glGetUniformLocation(scop->object.programShader, "activatePBR"), pbr);
-        keyStatus = 0;
-    }
-    else if (status == GLFW_RELEASE)
-        keyStatus = 1;
-}
-
-void getIBLKeyEvent(t_scop *scop) {
-    static char keyStatus = 1;
-    static char ibl = 1;
-    int status;
-
-    status = glfwGetKey(scop->window, GLFW_KEY_I);
-    if (status == GLFW_PRESS && keyStatus) {
-        ibl = !ibl;
-        glUniform1i(glGetUniformLocation(scop->object.programShader, "activateIBL"), ibl);
-        keyStatus = 0;
-    }
-    else if (status == GLFW_RELEASE)
-        keyStatus = 1;
-}
-
-void getMouseEvent(t_scop *scop) {
+static void getMouseEvent(t_scop *scop) {
     int state;
     double posx, posy;
 
@@ -81,6 +44,23 @@ void getMouseEvent(t_scop *scop) {
     }
     scop->mouse.x = posx;
     scop->mouse.y = posy;
+}
+
+static void getMetalEvent(t_scop *scop) {
+    static float metalValue = 1.0f;
+
+    if (glfwGetKey(scop->window, GLFW_KEY_KP_ADD) == GLFW_PRESS) {
+        if (metalValue < 0.99f) {
+            metalValue += 0.01f;
+            glUniform1f(glGetUniformLocation(scop->object.programShader, "metalUni"), metalValue);
+        }
+    }
+    if (glfwGetKey(scop->window, GLFW_KEY_KP_SUBTRACT) == GLFW_PRESS) {
+        if (metalValue > 0.01f) {
+            metalValue -= 0.01f;
+            glUniform1f(glGetUniformLocation(scop->object.programShader, "metalUni"), metalValue);
+        }
+    }
 }
 
 void getTransitionKeyEvent(t_scop *scop) {
@@ -118,13 +98,21 @@ void getWindowEvent(t_scop *scop) {
     }
 }
 
+void initGetKeysEvent() {
+    getKeysEvent(0, GLFW_KEY_N, "activateNormalMap", 1);
+    getKeysEvent(0, GLFW_KEY_I, "activateIBL", 1);
+    getKeysEvent(0, GLFW_KEY_P, "activatePBR", 1);
+    getKeysEvent(0, GLFW_KEY_L, "hasLights", 0);
+}
+
 void getEvents(t_scop *scop) {
     glfwPollEvents();
     getMouseEvent(scop);
     getWindowEvent(scop);
-    getNormalKeyEvent(scop);
-    getPBRKeyEvent(scop);
-    getIBLKeyEvent(scop);
-    getLightKeyEvent(scop);
+    getKeysEvent(scop, GLFW_KEY_N, "activateNormalMap", -1);
+    getKeysEvent(scop, GLFW_KEY_I, "activateIBL", -1);
+    getKeysEvent(scop, GLFW_KEY_P, "activatePBR", -1);
+    getKeysEvent(scop, GLFW_KEY_L, "hasLights", -1);
     getTransitionKeyEvent(scop);
+    getMetalEvent(scop);
 }

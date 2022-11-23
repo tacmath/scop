@@ -8,6 +8,8 @@ in mat3 TBN;
 
 const float PI = 3.14159265f;
 
+uniform float metalUni = 1.0f;
+
 uniform vec3 Osize;
 uniform vec3 lightPos;
 uniform vec3 cameraPos;
@@ -74,8 +76,8 @@ void main()
     vec3 ambient = 0.3f * Color;
     vec3 specular;
     vec3 diffuse;
-    float metallic = 0.6f;
-    float roughness = 0.4f;
+    float metallic = metalUni;
+    float roughness = 1.0f - metalUni;
     float ao = 1.0f;
 
     vec3 V = normalize(cameraPos - currentPos);

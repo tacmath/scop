@@ -2,6 +2,16 @@
 
 extern float cameraPosZ;
 
+static void setModelMatrix(t_scop *scop, GLuint matrixLoc) {
+    t_mat4 matrix = IDENTITY_MAT4;
+
+    mat4Traslate(&matrix, (t_vertex){
+                - ((scop->object.mesh.max.x - scop->object.mesh.min.x) / 2) - scop->object.mesh.min.x,
+                - ((scop->object.mesh.max.y - scop->object.mesh.min.y) / 2) - scop->object.mesh.min.y,
+                - ((scop->object.mesh.max.z - scop->object.mesh.min.z) / 2) - scop->object.mesh.min.z});
+    glUniformMatrix4fv(matrixLoc, 1, GL_TRUE, (GLfloat*)matrix);
+}
+
 static void initUniforms(t_scop *scop) {
     t_vertex objectSize =   {scop->object.mesh.max.x - scop->object.mesh.min.x,
                             scop->object.mesh.max.y - scop->object.mesh.min.y,
@@ -12,30 +22,21 @@ static void initUniforms(t_scop *scop) {
     glUniform1i(glGetUniformLocation(scop->background.programShader, "skybox"), 0);
 
     glUseProgram(scop->object.programShader);
-    glUniform3fv(glGetUniformLocation(scop->object.programShader, "Osize"), 1, (void*)(&objectSize));
-    glUniform3fv(glGetUniformLocation(scop->object.programShader, "Omin"), 1, (void*)(&scop->object.mesh.min));
-    glUniform3fv(glGetUniformLocation(scop->object.programShader, "lightPos"), 1, (void*)(&scop->lightPos));
-    glUniform1i(glGetUniformLocation(scop->object.programShader, "activateNormalMap"), 1);
-    glUniform1i(glGetUniformLocation(scop->object.programShader, "activateIBL"), 1);
-    glUniform1i(glGetUniformLocation(scop->object.programShader, "activatePBR"), 1);
-    glUniform1i(glGetUniformLocation(scop->object.programShader, "Texture"), 0); 
-    glUniform1i(glGetUniformLocation(scop->object.programShader, "NormalMap"), 1);
-    glUniform1i(glGetUniformLocation(scop->object.programShader, "MetalMap"), 2); 
-    glUniform1i(glGetUniformLocation(scop->object.programShader, "RouthnessMap"), 3);
-    glUniform1i(glGetUniformLocation(scop->object.programShader, "AOMap"), 4);
-    glUniform1i(glGetUniformLocation(scop->object.programShader, "irradianceMap"), 5);
-    glUniform1i(glGetUniformLocation(scop->object.programShader, "prefilterMap"), 6);
-    glUniform1i(glGetUniformLocation(scop->object.programShader, "brdfLUT"), 7);
-}
-
-void setModelMatrix(t_scop *scop, GLuint matrixLoc) {
-    t_mat4 matrix = IDENTITY_MAT4;
-
-    mat4Traslate(&matrix, (t_vertex){
-                /*- ((scop->object.mesh.max.x - scop->object.mesh.min.x) / 2) - scop->object.mesh.min.x*/0.0f,
-                - ((scop->object.mesh.max.y - scop->object.mesh.min.y) / 2) - scop->object.mesh.min.y,
-                - ((scop->object.mesh.max.z - scop->object.mesh.min.z) / 2) - scop->object.mesh.min.z});
-    glUniformMatrix4fv(matrixLoc, 1, GL_TRUE, (GLfloat*)matrix);
+    setModelMatrix(scop, glGetUniformLocation(scop->object.programShader, "model"));
+    glUniform3fv(glGetUniformLocation(scop->object.programShader, "Osize")              , 1, (void*)(&objectSize));
+    glUniform3fv(glGetUniformLocation(scop->object.programShader, "Omin")               , 1, (void*)(&scop->object.mesh.min));
+    glUniform3fv(glGetUniformLocation(scop->object.programShader, "lightPos")           , 1, (void*)(&scop->lightPos));
+    glUniform1i(glGetUniformLocation(scop->object.programShader, "activateNormalMap")   , 1);
+    glUniform1i(glGetUniformLocation(scop->object.programShader, "activateIBL")         , 1);
+    glUniform1i(glGetUniformLocation(scop->object.programShader, "activatePBR")         , 1);
+    glUniform1i(glGetUniformLocation(scop->object.programShader, "Texture")             , 0); 
+    glUniform1i(glGetUniformLocation(scop->object.programShader, "NormalMap")           , 1);
+    glUniform1i(glGetUniformLocation(scop->object.programShader, "MetalMap")            , 2); 
+    glUniform1i(glGetUniformLocation(scop->object.programShader, "RouthnessMap")        , 3);
+    glUniform1i(glGetUniformLocation(scop->object.programShader, "AOMap")               , 4);
+    glUniform1i(glGetUniformLocation(scop->object.programShader, "irradianceMap")       , 5);
+    glUniform1i(glGetUniformLocation(scop->object.programShader, "prefilterMap")        , 6);
+    glUniform1i(glGetUniformLocation(scop->object.programShader, "brdfLUT")             , 7);
 }
 
 static void setVPMatrix(t_scop *scop, GLuint matrixLoc) {
@@ -74,7 +75,6 @@ static void moveCamera(t_scop *scop) {
 }
 
 void mainLoop(t_scop *scop) {
-    GLuint modelMatrixLoc =     glGetUniformLocation(scop->object.programShader, "model");
 
     initUniforms(scop);
     glEnable(GL_DEPTH_TEST);
@@ -87,7 +87,7 @@ void mainLoop(t_scop *scop) {
         bindAllTextures(scop);
         moveCamera(scop);
         drawBackground(scop);
-        drawObject(scop, modelMatrixLoc);
+        drawObject(scop);
 		glfwSwapBuffers(scop->window);
         getEvents(scop);
         showFPS(scop->window);

@@ -4,6 +4,25 @@ float ObjectSize = 0;
 
 int loadAllTextures(t_scop *scop);
 
+int generateRandomFaceColor(GLuint size, GLuint VAO) {
+    t_vertex *colors;
+    t_vertex color;
+
+    if (!(colors = malloc(sizeof(t_vertex) * size)))
+        return (0);
+    for (int n = 0; n < size / 3; n++) {
+        color.x = ((float)rand()/(float)(RAND_MAX));
+        color.y = ((float)rand()/(float)(RAND_MAX));
+        color.z = ((float)rand()/(float)(RAND_MAX));
+        colors[n * 3] = color;
+        colors[n * 3 + 1] = color;
+        colors[n * 3 + 2] = color;
+    }
+    addArrayBuffer(VAO, (t_array){colors, size}, sizeof(t_vertex), 1);
+    free(colors);
+    return (1);
+}
+
 int generateVAO(t_scop  *scop) {
     t_array segment;
 
@@ -11,11 +30,12 @@ int generateVAO(t_scop  *scop) {
     if (!(scop->object.segments = calloc(sizeof(t_segment), scop->object.segmentNb)))
         return (0);
     
-    if (scop->object.mesh.indices.size) {
-        if (!(scop->object.programShader = initShaders("shaders/vertexShader.glsl", "shaders/fragmentShader.glsl", scop->path)))
+    if (!scop->object.mesh.normales.size || !scop->object.mesh.uvs.size) {
+        if (!(scop->object.programShader = initShaders((scop->option.smoothColor) ? "shaders/VertexShader.glsl" : "shaders/faceColorVS.glsl", "shaders/fragmentShader.glsl", scop->path)))
             return (0);
         scop->object.segments[0].VAO = initVertexArray(scop->object.mesh.vertices);
-        initElementArray(scop->object.segments[0].VAO, scop->object.mesh.indices);
+        if (!generateRandomFaceColor(scop->object.mesh.vertices.size, scop->object.segments[0].VAO))
+            return (0);
         scop->object.segmentNb = 1;
         return (1);
     }
@@ -48,6 +68,7 @@ int main(int ac, char **av) {
     mat4SetIdentity(&scop.rotation);
     ObjectSize = scop.object.mesh.max.y - scop.object.mesh.min.y;
     scop.lightPos = (t_vertex){scop.object.mesh.min.x * 1.5, ((scop.object.mesh.max.y - scop.object.mesh.min.y) / 2) * 1.5 - scop.object.mesh.min.y, (scop.object.mesh.max.z - scop.object.mesh.min.z) / 2 - scop.object.mesh.min.z};
+    initGetKeysEvent();
     mainLoop(&scop);
     freeAll(&scop);
     return (0);

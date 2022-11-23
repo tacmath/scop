@@ -24,8 +24,8 @@ INC = $(addprefix $(INCDIR),$(INCFILES))
 OBJ = $(SRCFILES:.c=.o)
 OBJS = $(addprefix $(OBJDIR),$(OBJ))
 
-FLAG = -I includes #-I ~/.brew/Cellar/glew/2.2.0_1/include -I ~/.brew/Cellar/glfw/3.3.8/include 
-LINK = -lglfw -lGLEW -lGL -lstb -lm -lpthread# -L ~/.brew/Cellar/glew/2.2.0_1/lib -L ~/.brew/Cellar/glfw/3.3.8/lib
+FLAG = -I includes -I ~/.brew/Cellar/glew/2.2.0_1/include -I ~/.brew/Cellar/glfw/3.3.8/include
+LINK = -lglfw -lGLEW  -lm -lpthread -L ~/.brew/Cellar/glew/2.2.0_1/lib -L ~/.brew/Cellar/glfw/3.3.8/lib -framework openGl # -lstb -lGl
 
 all: $(NAME)
 

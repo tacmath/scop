@@ -1,6 +1,7 @@
 #ifndef SCOP_H
 # define SCOP_H
 
+#include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -149,6 +150,7 @@ struct s_option {
     char        *texture;
     char        *background;
     char        IBL;
+    char        smoothColor;
 };
 
 typedef struct s_option t_option;
@@ -208,7 +210,6 @@ t_vec2 vec2sub(t_vec2 v1, t_vec2 v2);
 
 //  loop.c
 
-void setModelMatrix(t_scop *scop, GLuint matrixLoc);
 void mainLoop(t_scop *scop);
 
 //  cubeMap.c
@@ -257,10 +258,11 @@ void addArrayBuffer(GLuint VAO, t_array array, int dataSize, int arrayIndex);
 //  event.c
 
 void getEvents(t_scop *scop);
+void initGetKeysEvent();
 
 //  draw.c
 
 void drawBackground(t_scop *scop);
-void drawObject(t_scop *scop, GLuint modelMatrixLoc);
+void drawObject(t_scop *scop);
 
 #endif

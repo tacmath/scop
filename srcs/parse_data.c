@@ -11,6 +11,11 @@ int parseArguments(int ac, char **av, t_scop  *scop) {
         printUsage();
         return (0);
     }
+    for (int n = 1; n < ac; n++)
+        if (!strcmp(av[n], "-smooth")) {
+            scop->option.smoothColor = 1;
+            break;
+        }
     scop->option.texture = getOption("-t", ac, av, objectFile);
     scop->option.background = getOption("-b", ac, av, objectFile);
     return (1);

@@ -26,7 +26,6 @@ int initWindow(t_scop *scop) {
     }	
     glfwSetInputMode(scop->window, GLFW_STICKY_KEYS, GL_TRUE);
     glfwSetScrollCallback(scop->window, scroll_callback);
-//    printf("%s\n", glGetString(GL_VERSION));
     return (1);
 }
 

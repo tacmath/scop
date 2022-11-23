@@ -27,7 +27,8 @@ void getMeshBorders(t_mesh *mesh) {
 void getIndices(FILE *file, t_mesh *mesh) {
     t_indice  indices[4];
     char    buffer[4][30];
-    char    line[256];
+    char    *line;
+    size_t  lineSize;
     int ret;
 
     if (!mesh->indices.size && !mesh->segmentNb) {
@@ -35,8 +36,11 @@ void getIndices(FILE *file, t_mesh *mesh) {
         mesh->segments = calloc(1, sizeof(t_usemtl));
         mesh->segments->start = 0;
     }
-    fscanf(file, "%[^\n]", line);
-    if ((ret = sscanf(line, "%s %s %s %s\n", buffer[0], buffer[1], buffer[2], buffer[3])) < 3)
+    line = fgetln(file, &lineSize);
+    if (!lineSize)
+        return ;
+    line[lineSize - 1] = 0;
+    if ((ret = sscanf(line, "%s %s %s %s", buffer[0], buffer[1], buffer[2], buffer[3])) < 3)
         return;
     for (int n = 0; n < ret; n++)
         sscanf(buffer[n], "%d/%d/%d", &(indices[n].vertex), &(indices[n].uvs), &(indices[n].normale));
@@ -66,28 +70,6 @@ void getUvs(FILE *file, t_mesh *mesh) {
     fscanf(file, "%f %f\n", &uv.x, &uv.y);
     ((t_vec2*)mesh->uvs.data)[mesh->uvs.size++] = uv;
 }
-/*
-void printObjectData(t_mesh *mesh) {
-    GLuint *indices = mesh->indices.data;
-    t_vertex *vertices = mesh->vertices.data;
-    t_vertex *normales = mesh->normales.data;
-    t_vec2  *uvs =mesh->uvs.data;
-
-    printf("Vertices :\n\n");
-    for (int n = 0; n < mesh->vertices.size; n++)
-        printf("v = (%7.4f, %7.4f, %7.4f)\n", vertices[n].x, vertices[n].y, vertices[n].z);
-    printf("\nUvs :\n\n");
-    for (int n = 0; n < mesh->uvs.size; n++)
-        printf("uv = %7.4f, %7.4f\n", uvs[n].x, uvs[n].y);
-    printf("\nNormales :\n\n");
-    for (int n = 0; n < mesh->normales.size; n++)
-        printf("n = (%7.4f, %7.4f, %7.4f)\n", normales[n].x, normales[n].y, normales[n].z);
-    printf("\nIndices :\n\n");
-    for (int n = 0; n < (mesh->indices.size / 3); n++)
-        printf("indices = %6d, %6d, %6d\n", indices[n * 3], indices[n * 3 + 1], indices[n * 3 + 2]);
-    printf("\nmin = (%7.4f, %7.4f, %7.4f)\n", mesh->min.x, mesh->min.y, mesh->min.z);
-    printf("max = (%7.4f, %7.4f, %7.4f)\n", mesh->max.x, mesh->max.y, mesh->max.z);
-}*/
 
 void printSegments(t_mesh *mesh) {
     for (int n = 0; n < mesh->segmentNb; n++) {
@@ -110,9 +92,12 @@ int indexMeshData(t_mesh *mesh) {
         !(newUvs = malloc(sizeof(t_vec2) * mesh->indices.size)))
         return (0);
     for (int n = 0; n < mesh->indices.size; n++) {
-        newVertices[n] = ((t_vertex*)mesh->vertices.data)[indices[n].vertex - 1];       // faire gaffe ca va crash si l'index est faux
-        newUvs[n] = ((t_vec2*)mesh->uvs.data)[indices[n].uvs - 1];
-        newNormales[n] = ((t_vertex*)mesh->normales.data)[indices[n].normale - 1];
+        if (mesh->vertices.size > indices[n].vertex - 1 && indices[n].vertex > 0)
+            newVertices[n] = ((t_vertex*)mesh->vertices.data)[indices[n].vertex - 1];
+        if (mesh->uvs.size > indices[n].uvs - 1 && indices[n].uvs > 0)
+            newUvs[n] = ((t_vec2*)mesh->uvs.data)[indices[n].uvs - 1];
+        if (mesh->normales.size > indices[n].normale - 1 && indices[n].normale > 0)
+            newNormales[n] = ((t_vertex*)mesh->normales.data)[indices[n].normale - 1];
     }
     free(mesh->vertices.data);
     free(mesh->normales.data);
@@ -130,17 +115,21 @@ int indexMeshData(t_mesh *mesh) {
 }
 
 int parseIndices(t_mesh *mesh) {
-    GLuint *newIndices;
+    t_vertex *newVertices;
     t_indice  *indices;
 
     if (!mesh->normales.size || !mesh->uvs.size) {
-        if (!(newIndices = malloc(sizeof(GLuint) * mesh->indices.size)))
+        if (!(newVertices = malloc(sizeof(t_vertex) * mesh->indices.size)))
             return (0);
         indices = mesh->indices.data;
         for (int n = 0; n < mesh->indices.size; n++)
-            newIndices[n] = indices[n].vertex - 1;
+            if (mesh->vertices.size > indices[n].vertex - 1 && indices[n].vertex > 0)
+                newVertices[n] = ((t_vertex*)mesh->vertices.data)[indices[n].vertex - 1];
+        free(mesh->vertices.data);
+        mesh->vertices.data = newVertices;
+        mesh->vertices.size = mesh->indices.size;
         free(mesh->indices.data);
-        mesh->indices.data = newIndices;
+        mesh->indices.data = 0;
         return (1);
     }
     indexMeshData(mesh);
@@ -150,7 +139,7 @@ int parseIndices(t_mesh *mesh) {
 void parseMtllib(t_mesh *mesh, char *path) {
     FILE *file;
     char *fileName;
-    char buffer[256];
+    char buffer[1024];
     int segmentIndex;
 
     if (!mesh->mltFile)
@@ -187,11 +176,15 @@ void parseMtllib(t_mesh *mesh, char *path) {
 }
 
 void addSegment(FILE *file, t_mesh *mesh) {
-    char buffer[256];
-    char name[256];
+    char *line;
+    size_t len;
+    char name[1024];
 
-    fscanf(file, "%[^\n]", buffer);
-    if (sscanf(buffer, "%s", name) < 1)
+    line = fgetln(file, &len);
+    if (!len)
+        return ;
+    line[len - 1] = 0;
+    if (sscanf(line, "%s", name) < 1)
         return ;
     mesh->segments = realloc(mesh->segments, sizeof(t_usemtl) * (mesh->segmentNb + 1));
     mesh->segments[mesh->segmentNb].name = strdup(name);
@@ -207,7 +200,7 @@ void parseSegments(t_mesh *mesh) {
 
 int getObjectData(t_mesh *mesh, char *fileName) {
     FILE *file;
-    char buffer[256];
+    char buffer[1024];
 
     if (!(file = fopen(fileName, "r")))
         return (0);

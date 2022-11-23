@@ -35,6 +35,7 @@ void printUsage() {
     printf("option :\n");
     printf("  -t  TEXTURE_FILE\n");
     printf("  -b  BACKGROUND_TEXTURE_FILE\n");
+    printf("  -smooth\n");
 }
 
 void freeMeshData(t_mesh *mesh) {
@@ -53,11 +54,15 @@ void freeAll(t_scop *scop) {
     glDeleteTextures(1, &scop->background.textureID);
     glDeleteTextures(1, &scop->textures.defaultTextureID);
     for (int n = 0; n < scop->object.segmentNb; n++) {
+        glDeleteVertexArrays(1, &scop->object.segments[n].VAO);
         glDeleteTextures(1, &scop->object.segments[n].textureID);
         glDeleteTextures(1, &scop->object.segments[n].normalTextureID);
         glDeleteTextures(1, &scop->object.segments[n].metalTextureID);
         glDeleteTextures(1, &scop->object.segments[n].routhTextureID);
     }
+    glDeleteVertexArrays(1, &scop->background.VAO);
+    glDeleteProgram(scop->background.programShader);
+    glDeleteProgram(scop->object.programShader);
     free(scop->object.segments);
     free(scop->textures.object);
 }
