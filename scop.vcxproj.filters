@@ -14,4 +14,94 @@
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="includes\scop.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\stb_image.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="srcs\cubeMap.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="srcs\draw.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="srcs\event.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="srcs\init.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="srcs\loop.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="srcs\main.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="srcs\matrix.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="srcs\parse_data.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="srcs\parse_file.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="srcs\str_utils.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="srcs\textureLoading.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="srcs\utils.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="srcs\VAO.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="srcs\vector.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\basicVS.glsl">
+      <Filter>Fichiers de ressources</Filter>
+    </None>
+    <None Include="shaders\brdfFS.glsl">
+      <Filter>Fichiers de ressources</Filter>
+    </None>
+    <None Include="shaders\brdfVS.glsl">
+      <Filter>Fichiers de ressources</Filter>
+    </None>
+    <None Include="shaders\completeFS.glsl">
+      <Filter>Fichiers de ressources</Filter>
+    </None>
+    <None Include="shaders\completeVS.glsl">
+      <Filter>Fichiers de ressources</Filter>
+    </None>
+    <None Include="shaders\EquirectangularToCubemapFS.glsl">
+      <Filter>Fichiers de ressources</Filter>
+    </None>
+    <None Include="shaders\fragmentShader.glsl">
+      <Filter>Fichiers de ressources</Filter>
+    </None>
+    <None Include="shaders\irradianceFS.glsl">
+      <Filter>Fichiers de ressources</Filter>
+    </None>
+    <None Include="shaders\prefillerFS.glsl">
+      <Filter>Fichiers de ressources</Filter>
+    </None>
+    <None Include="shaders\skyBoxFS.glsl">
+      <Filter>Fichiers de ressources</Filter>
+    </None>
+    <None Include="shaders\skyBoxVS.glsl">
+      <Filter>Fichiers de ressources</Filter>
+    </None>
+    <None Include="shaders\vertexShader.glsl">
+      <Filter>Fichiers de ressources</Filter>
+    </None>
+  </ItemGroup>
 </Project>

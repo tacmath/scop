@@ -61,7 +61,7 @@ void mat4Scale(t_mat4 *result, t_vertex vector) {
 }
 
 void perspective(float fov, float ratio, float near, float far, t_mat4 *result) {
-    float   scale = 1.0f / tanf((fov / 2.0f) * (PI / 180.0f));
+    float   scale = 1.0f / tanf((fov / 2.0f) * (float)(PI / 180.0f));
     t_mat4 matrix = {{scale / ratio,    0,      0,      0}
                     ,{0,                scale,  0,      0}
                     ,{0,                0,      -((far + near) / (far - near)),   -((2 * far * near) / (far - near))}
@@ -70,8 +70,8 @@ void perspective(float fov, float ratio, float near, float far, t_mat4 *result) 
 }
 
 void rotate(t_mat4 matrix, float angle, t_vertex vector, t_mat4 *result) {
-    float c = cosf((PI / 180.0f) * angle);
-    float s = sinf((PI / 180.0f) * angle);
+    float c = cosf((float)(PI / 180.0f) * angle);
+    float s = sinf((float)(PI / 180.0f) * angle);
     normalise(&vector);
     float x = vector.x;
     float y = vector.y;

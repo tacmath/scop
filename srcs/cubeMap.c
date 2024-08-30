@@ -124,7 +124,7 @@ GLuint generateRoughnessMipmapFromSkyBox(GLuint skybox, char *path, GLuint cubeV
 
 	for (unsigned int mip = 0; mip < maxMipLevels; ++mip)
 	{
-    	unsigned int mipResolution  = PEFILLER_RESOLUTION * pow(0.5, mip);
+    	unsigned int mipResolution  = (unsigned int)(PEFILLER_RESOLUTION * pow(0.5, mip));
 		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mipResolution, mipResolution);
     	float roughness = (float)mip / (float)(maxMipLevels - 1);
 		glUniform1f(glGetUniformLocation(programShader, "roughness"), roughness);
@@ -268,7 +268,6 @@ unsigned int skyboxIndices[] =
 	3, 7, 6,
 	6, 2, 3
 };
-    t_texture texture;
     pthread_t	thread;
 
     scop->background.VAO = initVertexArray((t_array){skyboxVertices, 8});

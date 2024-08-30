@@ -3,7 +3,7 @@
 int parseArguments(int ac, char **av, t_scop  *scop) {
     char    *objectFile;
     
-    scop->path = strrchr(av[0], '/');
+    scop->path = strrchr(av[0], DIR_SEPARATOR);
     scop->path[1] = 0;
     scop->path = av[0];
     if (!(objectFile = getObjectFile(ac, av)) ||
@@ -59,7 +59,7 @@ void getTanAndBiTan(t_scop  *scop) {
         bitangent[n + 2] = vec3;
         
     }
-    for (int n = 0; n < scop->object.segmentNb; n++) {
+    for (unsigned n = 0; n < scop->object.segmentNb; n++) {
         segment.data = tangent + scop->object.mesh.segments[n].start;
         segment.size = scop->object.mesh.segments[n].size;
         addArrayBuffer(scop->object.segments[n].VAO, segment, sizeof(t_vertex), 3);
@@ -71,8 +71,8 @@ void getTanAndBiTan(t_scop  *scop) {
 }
 
 void parseNormals(t_scop  *scop) {
-    t_vertex normal;
-    t_vertex *normals;
+    //t_vertex normal;
+    //t_vertex *normals;
     t_array  segment;
 
  /*   normals = scop->object.mesh.normales.data;
@@ -85,8 +85,8 @@ void parseNormals(t_scop  *scop) {
         normals[n + 1] = normal;
         normals[n + 2] = normal;
     }*/
-    for (int n = 0; n < scop->object.segmentNb; n++) {
-        segment.data = scop->object.mesh.normales.data + scop->object.mesh.segments[n].start * sizeof(t_vertex);
+    for (unsigned n = 0; n < scop->object.segmentNb; n++) {
+        segment.data = (t_vertex*)scop->object.mesh.normales.data + scop->object.mesh.segments[n].start;
         segment.size = scop->object.mesh.segments[n].size;
         addArrayBuffer(scop->object.segments[n].VAO, segment, sizeof(t_vertex), 2);
     }

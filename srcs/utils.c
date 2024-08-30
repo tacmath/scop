@@ -6,28 +6,36 @@ extern float ObjectSize;
 char *getShaderSource(char *fileName) {
     char    *source;
     int     fd;
-    size_t  fileLength;
+    unsigned  fileLength;
 
     if ((fd = open(fileName, O_RDONLY)) <= 0) {
         dprintf(2, "Failed to open %s\n", fileName);
         return (0);
     }
-    fileLength = lseek(fd, 0, SEEK_END);
+    fileLength =lseek(fd, 0, SEEK_END);
     lseek(fd, 0, SEEK_SET);
     if (!(source = malloc(sizeof(char) * (fileLength + 1))))
         return (0);
-    source[fileLength] = 0;
     read(fd, source, fileLength);
+    source[fileLength] = 0;
+    #ifdef _WIN32
     close(fd);
+    for (unsigned i = 0; i < fileLength; i++) {
+        if (source[i] == '\n') {
+            fileLength--;
+            source[fileLength] = 0;
+        }
+    }
+    #endif
     return (source);
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
     if (yoffset > 0)
-        cameraPosZ += 0.2 * ObjectSize;
+        cameraPosZ += 0.2f * ObjectSize;
     else if (yoffset < 0)
-        cameraPosZ -= 0.2 * ObjectSize;
+        cameraPosZ -= 0.2f * ObjectSize;
 }
 
 void printUsage() {
@@ -52,7 +60,7 @@ void freeMeshData(t_mesh *mesh) {
 void freeAll(t_scop *scop) {
     glDeleteTextures(1, &scop->background.textureID);
     glDeleteTextures(1, &scop->textures.defaultTextureID);
-    for (int n = 0; n < scop->object.segmentNb; n++) {
+    for (unsigned n = 0; n < scop->object.segmentNb; n++) {
         glDeleteTextures(1, &scop->object.segments[n].textureID);
         glDeleteTextures(1, &scop->object.segments[n].normalTextureID);
         glDeleteTextures(1, &scop->object.segments[n].metalTextureID);

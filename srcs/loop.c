@@ -12,6 +12,7 @@ static void initUniforms(t_scop *scop) {
     glUniform1i(glGetUniformLocation(scop->background.programShader, "skybox"), 0);
 
     glUseProgram(scop->object.programShader);
+    glUniform1i(glGetUniformLocation(scop->object.programShader, "skybox"), 0);
     glUniform3fv(glGetUniformLocation(scop->object.programShader, "Osize"), 1, (void*)(&objectSize));
     glUniform3fv(glGetUniformLocation(scop->object.programShader, "Omin"), 1, (void*)(&scop->object.mesh.min));
     glUniform3fv(glGetUniformLocation(scop->object.programShader, "lightPos"), 1, (void*)(&scop->lightPos));

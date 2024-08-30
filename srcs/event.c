@@ -72,15 +72,15 @@ void getMouseEvent(t_scop *scop) {
         t_mat4 tmp;
         float  rotationY;
         
-        scop->object.rotation.y += posx - scop->mouse.x;
-        if (fabs(scop->object.rotation.x + posy - scop->mouse.y) < 90)
-            scop->object.rotation.x += posy - scop->mouse.y;
-        rotationY = scop->object.rotation.y * (PI / 180.0f);
+        scop->object.rotation.y += (GLfloat)posx - scop->mouse.x;
+        if (fabs(scop->object.rotation.x + (GLfloat)posy - scop->mouse.y) < 90)
+            scop->object.rotation.x += (GLfloat)posy - scop->mouse.y;
+        rotationY = scop->object.rotation.y * ((GLfloat)PI / 180.0f);
         rotate(matrix, scop->object.rotation.y, (t_vertex){0.0f, 1.0f, 0.0f}, &tmp);
-        rotate(tmp, scop->object.rotation.x, (t_vertex){cos(rotationY), 0.0f, sin(rotationY)}, &scop->rotation);
+        rotate(tmp, scop->object.rotation.x, (t_vertex){(float)cos(rotationY), 0.0f, (float)sin(rotationY)}, &scop->rotation);
     }
-    scop->mouse.x = posx;
-    scop->mouse.y = posy;
+    scop->mouse.x = (GLfloat)posx;
+    scop->mouse.y = (GLfloat)posy;
 }
 
 void getTransitionKeyEvent(t_scop *scop) {
@@ -96,11 +96,11 @@ void getTransitionKeyEvent(t_scop *scop) {
     else if (status == GLFW_RELEASE)
         keyStatusT = 1;
     if (scop->transition >= 0 && transition == -1) {
-        scop->transition -= 0.02;
+        scop->transition -= 0.02f;
         glUniform1f(glGetUniformLocation(scop->object.programShader, "transition"), scop->transition);
     }
     else if (scop->transition <= 1 && transition == 1) {
-        scop->transition += 0.02;
+        scop->transition += 0.02f;
         glUniform1f(glGetUniformLocation(scop->object.programShader, "transition"), scop->transition);
     }
 }

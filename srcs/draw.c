@@ -29,13 +29,13 @@ void drawObject(t_scop *scop, GLuint modelMatrixLoc) {
 #endif
     glUseProgram(scop->object.programShader);
     setModelMatrix(scop, modelMatrixLoc);
-    for (int n = 0; n < scop->object.segmentNb; n++) {
+    for (unsigned n = 0; n < scop->object.segmentNb; n++) {
         glBindVertexArray(scop->object.segments[n].VAO);
         setSegmentTextures(&scop->object.segments[n]);
         if (scop->object.mesh.indices.size)
-            glDrawElements(GL_TRIANGLES, scop->object.mesh.indices.size , GL_UNSIGNED_INT, 0);
+            glDrawElements(GL_TRIANGLES, (GLsizei)scop->object.mesh.indices.size, GL_UNSIGNED_INT, 0);
         else
-            glDrawArrays(GL_TRIANGLES, 0, scop->object.mesh.vertices.size);
+            glDrawArrays(GL_TRIANGLES, 0, (GLsizei)scop->object.mesh.vertices.size);
     }
 #ifdef FACE_CULLING
     glDisable(GL_CULL_FACE);

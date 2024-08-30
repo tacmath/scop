@@ -91,10 +91,10 @@ void printObjectData(t_mesh *mesh) {
 
 void printSegments(t_mesh *mesh) {
     for (int n = 0; n < mesh->segmentNb; n++) {
-        dprintf(1, "\nname = %s\n", mesh->segments[n].name);
-        dprintf(1, "texture = %s\n", mesh->segments[n].texture);
-        dprintf(1, "start = %zu\n", mesh->segments[n].start);
-        dprintf(1, "size = %zu\n", mesh->segments[n].size);
+        printf("\nname = %s\n", mesh->segments[n].name);
+        printf("texture = %s\n", mesh->segments[n].texture);
+        printf("start = %zu\n", mesh->segments[n].start);
+        printf("size = %zu\n", mesh->segments[n].size);
     }
 }
 
@@ -155,7 +155,8 @@ void parseMtllib(t_mesh *mesh, char *path) {
 
     if (!mesh->mltFile)
         return ;
-    if ((fileName = strrchr(path, '/'))) {
+    printf("path %s\n", path);
+    if ((fileName = strrchr(path, DIR_SEPARATOR))) {
         fileName[1] = 0;
         fileName = ft_strjoin(path, mesh->mltFile);
         free(mesh->mltFile);
@@ -179,7 +180,7 @@ void parseMtllib(t_mesh *mesh, char *path) {
         }
         else if (!strcmp(buffer, "map_Kd")) {
             fscanf(file, "%s\n", buffer);
-            if (segmentIndex != -1)
+            if (segmentIndex != -1) 
                 mesh->segments[segmentIndex].texture = ft_strjoin(path, buffer);
         }
     }
@@ -209,8 +210,10 @@ int getObjectData(t_mesh *mesh, char *fileName) {
     FILE *file;
     char buffer[256];
 
-    if (!(file = fopen(fileName, "r")))
+    if (!(file = fopen(fileName, "r"))) {
+        dprintf(2, "failed to open %s\n", fileName);
         return (0);
+    }
     bzero(mesh, sizeof(t_mesh));
     while (fscanf(file, "%s", buffer) != EOF) {
         if (!strcmp(buffer, "v"))

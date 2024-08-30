@@ -7,7 +7,7 @@ int loadAllTextures(t_scop *scop);
 int generateVAO(t_scop  *scop) {
     t_array segment;
 
-    scop->object.segmentNb = scop->object.mesh.segmentNb;
+    scop->object.segmentNb = (GLuint)scop->object.mesh.segmentNb;
     if (!(scop->object.segments = calloc(sizeof(t_segment), scop->object.segmentNb)))
         return (0);
     
@@ -22,11 +22,11 @@ int generateVAO(t_scop  *scop) {
     scop->option.IBL = 1;
     if (!(scop->object.programShader = initShaders("shaders/completeVS.glsl", "shaders/completeFS.glsl", scop->path)))
         return (0);
-    for (int n = 0; n < scop->object.segmentNb; n++) {
-        segment.data = scop->object.mesh.vertices.data + scop->object.mesh.segments[n].start * sizeof(t_vertex);
+    for (unsigned n = 0; n < scop->object.segmentNb; n++) {
+        segment.data = (t_vertex*)scop->object.mesh.vertices.data + scop->object.mesh.segments[n].start;
         segment.size = scop->object.mesh.segments[n].size;
         scop->object.segments[n].VAO = initVertexArray(segment);
-        segment.data = scop->object.mesh.uvs.data + scop->object.mesh.segments[n].start * sizeof(t_vec2);
+        segment.data = (t_vec2*)scop->object.mesh.uvs.data + scop->object.mesh.segments[n].start;
         addArrayBuffer(scop->object.segments[n].VAO, segment, sizeof(t_vec2), 1);
     }
     parseNormals(scop);
@@ -47,7 +47,7 @@ int main(int ac, char **av) {
     perspective(45.0f, (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, 0.1f, 200.0f, &scop.projection);
     mat4SetIdentity(&scop.rotation);
     ObjectSize = scop.object.mesh.max.y - scop.object.mesh.min.y;
-    scop.lightPos = (t_vertex){scop.object.mesh.min.x * 1.5, ((scop.object.mesh.max.y - scop.object.mesh.min.y) / 2) * 1.5 - scop.object.mesh.min.y, (scop.object.mesh.max.z - scop.object.mesh.min.z) / 2 - scop.object.mesh.min.z};
+    scop.lightPos = (t_vertex){scop.object.mesh.min.x * 1.5f, ((scop.object.mesh.max.y - scop.object.mesh.min.y) / 2) * 1.5f - scop.object.mesh.min.y, (scop.object.mesh.max.z - scop.object.mesh.min.z) / 2 - scop.object.mesh.min.z};
     mainLoop(&scop);
     freeAll(&scop);
     return (0);
